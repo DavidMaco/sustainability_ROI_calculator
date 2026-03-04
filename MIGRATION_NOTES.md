@@ -12,12 +12,13 @@
 
 ## Formula Preservation
 
-All ROI formulas are **unchanged**:
+All ROI formulas are **unchanged** in structure; v2.0.1 corrected the unit conversions:
+
 - `Net Annual Benefit = Operational Savings − Cost Increase`
 - `Operational Savings = Carbon Tax Savings + Water Savings + Waste Savings`
-- `Carbon Tax Savings = carbon_saved × ₦50,000/ton`
-- `Water Cost Savings = (water_saved / 1000) × ₦150`
-- `Waste Savings = waste_reduced × ₦80,000/ton`
+- `Carbon Tax Savings = (carbon_saved_kg / 1000) × ₦50,000/ton`
+- `Water Cost Savings = (water_saved_liters / 1000) × ₦150/1000L`
+- `Waste Savings = (waste_reduced_kg / 1000) × ₦80,000/ton`
 - `ROI % = Net Benefit / |Cost Increase| × 100`
 - `Payback = |Cost Increase| / Operational Savings`
 

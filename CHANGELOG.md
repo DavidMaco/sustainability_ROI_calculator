@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.0.2] — 2026-03-04
+
+### Fixed
+- Hardened `materials_mix` JSON parsing in `calculate_scenario_impacts` — replaced
+  fragile `.replace("'", '"')` with `ast.literal_eval` fallback (same strategy as
+  `CsvAdapter`).
+- Unified water savings formula in `calculate_custom_scenario` to match the clear
+  `(water_saved / 1000) × rate` pattern used in `calculate_scenario_impacts`.
+  Mathematically identical; eliminates confusing intermediate expressions.
+- `_safe_print` promoted from nested function to module-level in `pipeline/runner.py`
+  for testability and reuse.
+
+### Added
+- `LICENSE` — MIT license.
+- `requirements-dev.txt` — separated dev/quality dependencies from runtime.
+- Per-file ruff ignore for `F401` in `__init__.py` files (removed risky global ignore).
+- Additional `.gitignore` entries: `Thumbs.db`, `*.env`, `*.log`, `.mypy_cache/`.
+
+### Changed
+- `MIGRATION_NOTES.md` formulas updated to reflect v2.0.1 unit-conversion corrections.
+- `PRODUCTION_READINESS.md` updated to v2.0.2 with v2.0.1 fix items.
+- README redesigned for visual impact with TOC, feature grid, architecture diagram,
+  and contributing section.
+
 ## [2.0.1] — 2026-03-04
 
 ### Fixed
