@@ -56,7 +56,7 @@ st.markdown("---")
 st.header("Key Insight")
 st.info(
     "**Key Insight:** Sustainability delivers ~82% carbon reduction, but direct annual ROI "
-    "is negative (~−50%) under current assumptions. Business viability depends on policy "
+    "shows a loss of approximately 50% under current assumptions. Business viability depends on policy "
     "incentives, avoided risk, and strategic value.",
     icon="💡",
 )
