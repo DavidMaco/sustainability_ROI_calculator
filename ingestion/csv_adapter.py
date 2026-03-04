@@ -28,6 +28,7 @@ class CsvAdapter(DataAdapter):
         df = pd.read_csv(self.data_dir / "company_scenarios.csv")
         # Normalise materials_mix from JSON string → dict
         if "materials_mix" in df.columns:
+
             def _parse_mix(value: object) -> object:
                 if not isinstance(value, str):
                     return value

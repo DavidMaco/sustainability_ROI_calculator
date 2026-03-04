@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import sys
 import time
 
 import pandas as pd
@@ -20,6 +19,15 @@ from ingestion.base import DataAdapter
 from ingestion.csv_adapter import CsvAdapter
 
 logger = logging.getLogger(__name__)
+
+
+def _safe_print(*args: object, **kwargs: object) -> None:
+    """Print with graceful fallback for Unicode on restricted terminals (e.g. Windows cp1252)."""
+    text = " ".join(str(a) for a in args)
+    try:
+        print(text, **kwargs)
+    except UnicodeEncodeError:
+        print(text.encode("ascii", errors="replace").decode("ascii"), **kwargs)
 
 
 def run_pipeline(adapter: DataAdapter | None = None) -> None:
@@ -55,14 +63,6 @@ def run_pipeline(adapter: DataAdapter | None = None) -> None:
 
     elapsed = time.perf_counter() - start
     logger.info("Pipeline complete in %.2fs — artifacts in %s", elapsed, adapter.data_dir)
-
-    # Console summary — use errors="replace" to handle ₦ on Windows cp1252 terminals
-    def _safe_print(*args: object, **kwargs: object) -> None:
-        text = " ".join(str(a) for a in args)
-        try:
-            print(text, **kwargs)
-        except UnicodeEncodeError:
-            print(text.encode("ascii", errors="replace").decode("ascii"), **kwargs)
 
     _safe_print("\n" + "=" * 80)
     _safe_print("SUSTAINABILITY ROI CALCULATOR — PIPELINE RESULTS")

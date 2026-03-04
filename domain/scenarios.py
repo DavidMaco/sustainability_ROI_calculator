@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from ast import literal_eval
 
 import pandas as pd
 
@@ -91,7 +92,13 @@ def calculate_scenario_impacts(scenarios_df: pd.DataFrame, materials_df: pd.Data
     for _, company in scenarios_df.iterrows():
         mix = company["materials_mix"]
         if isinstance(mix, str):
-            mix = json.loads(mix.replace("'", '"'))
+            try:
+                mix = json.loads(mix)
+            except json.JSONDecodeError:
+                parsed = literal_eval(mix)
+                if not isinstance(parsed, dict):
+                    raise TypeError(f"Expected dict for materials_mix, got {type(parsed).__name__}")
+                mix = parsed
 
         trad_cost = trad_carbon = trad_water = trad_waste = 0.0
         sust_cost = sust_carbon = sust_water = sust_waste = 0.0
@@ -201,15 +208,13 @@ def calculate_custom_scenario(
         waste_reduced += (trad["waste_generated_per_unit"] - sust["waste_generated_per_unit"]) * quantity
 
     carbon_tax_rate = carbon_tax_ngn_per_ton if carbon_tax_ngn_per_ton is not None else cfg.CARBON_TAX_NGN_PER_TON
-    water_cost_rate = (
-        water_cost_ngn_per_1000l if water_cost_ngn_per_1000l is not None else cfg.WATER_COST_NGN_PER_1000L
-    )
+    water_cost_rate = water_cost_ngn_per_1000l if water_cost_ngn_per_1000l is not None else cfg.WATER_COST_NGN_PER_1000L
     waste_cost_rate = waste_cost_ngn_per_ton if waste_cost_ngn_per_ton is not None else cfg.WASTE_COST_NGN_PER_TON
 
-    # Operational savings (matching legacy formula exactly)
-    carbon_tax_savings = (carbon_saved / 1000) * carbon_tax_rate
-    water_cost_savings = (water_saved / 1_000_000) * (water_cost_rate * 1000)
-    waste_savings = (waste_reduced / 1000) * waste_cost_rate
+    # Operational savings — consistent unit conversion across both functions
+    carbon_tax_savings = (carbon_saved / 1000) * carbon_tax_rate  # kg → tons
+    water_cost_savings = (water_saved / 1000) * water_cost_rate  # liters → thousands of liters
+    waste_savings = (waste_reduced / 1000) * waste_cost_rate  # kg → tons
 
     operational_savings = carbon_tax_savings + water_cost_savings + waste_savings
     cost_increase = sust_cost - trad_cost
