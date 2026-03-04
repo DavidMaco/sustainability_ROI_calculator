@@ -42,18 +42,18 @@ st.caption(
 results_df = adapter.load_results()
 
 # ── Quick Stats ──────────────────────────────────────────────────────
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3 = st.columns(3)
 col1.metric("Companies", f"{len(results_df)}")
 col2.metric("Avg Carbon Reduction", f"{results_df['carbon_reduction_pct'].mean():.0f}%")
-col3.metric("Avg ROI", f"{results_df['roi_pct'].mean():,.0f}%")
-col4.metric(
+col3.metric(
     "Total Net Benefit",
     f"{cfg.CURRENCY_SYMBOL}{results_df['net_annual_impact_ngn'].sum():,.0f}",
 )
 
 st.markdown("---")
 
-# ── Key Insight (concise) ────────────────────────────────────────────
+# ── Key Insight Section ─────────────────────────────────────────────
+st.header("Key Insight")
 st.info(
     "**Key Insight:** Sustainability delivers ~82% carbon reduction, but direct annual ROI "
     "is negative (~−50%) under current assumptions. Business viability depends on policy "
@@ -61,22 +61,20 @@ st.info(
     icon="💡",
 )
 
-# ── How it Works + Assumptions — side-by-side, collapsed ─────────────
-left, right = st.columns(2)
+# ── How it Works + Assumptions — stacked ────────────────────────────
+st.subheader("How it Works")
+with st.expander("📐 ROI Formula", expanded=False):
+    st.code(
+        "Net Annual Benefit = Operational Savings − Cost Increase\n"
+        "  Operational Savings = Carbon Tax + Water + Waste Savings",
+        language=None,
+    )
 
-with left:
-    with st.expander("📐 ROI Formula", expanded=False):
-        st.code(
-            "Net Annual Benefit = Operational Savings − Cost Increase\n"
-            "  Operational Savings = Carbon Tax + Water + Waste Savings",
-            language=None,
-        )
-
-with right:
-    with st.expander("⚙️ Economic Assumptions", expanded=False):
-        st.markdown(
-            "| Parameter | Value |\n|:---|---:|\n"
-            f"| Carbon Tax | ₦{cfg.CARBON_TAX_NGN_PER_TON:,.0f}/ton |\n"
-            f"| Water Cost | ₦{cfg.WATER_COST_NGN_PER_1000L:,.0f}/1 000 L |\n"
-            f"| Waste Disposal | ₦{cfg.WASTE_COST_NGN_PER_TON:,.0f}/ton |"
-        )
+st.subheader("Economic Assumptions")
+with st.expander("⚙️ Economic Assumptions", expanded=False):
+    st.markdown(
+        "| Parameter | Value |\n|:---|---:|\n"
+        f"| Carbon Tax | ₦{cfg.CARBON_TAX_NGN_PER_TON:,.0f}/ton |\n"
+        f"| Water Cost | ₦{cfg.WATER_COST_NGN_PER_1000L:,.0f}/1 000 L |\n"
+        f"| Waste Disposal | ₦{cfg.WASTE_COST_NGN_PER_TON:,.0f}/ton |"
+    )
