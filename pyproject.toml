@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sustainability-roi-calculator"
-version = "2.0.1"
+version = "2.0.2"
 description = "Sustainability ROI Calculator for Manufacturing — proving ESG delivers financial returns"
 requires-python = ">=3.12"
 
@@ -30,8 +30,11 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = ["E501", "E402", "F401"]
+ignore = ["E501", "E402"]
 exclude = ["__pycache__", ".venv", "data", "legacy", "analyze_sustainability.py", "generate_sustainability_data.py"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["domain", "ingestion", "pipeline"]
