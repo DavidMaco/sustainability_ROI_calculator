@@ -1,10 +1,8 @@
 """Material Explorer — compare traditional vs sustainable options."""
 
-import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-import config as cfg
 from domain.recommendations import build_material_comparison_table, identify_quick_wins
 from ingestion.csv_adapter import CsvAdapter
 

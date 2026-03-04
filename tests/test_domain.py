@@ -3,7 +3,6 @@
 import pandas as pd
 import pytest
 
-import config as cfg
 from domain.materials import generate_material_profiles
 from domain.recommendations import build_material_comparison_table, identify_quick_wins
 from domain.scenarios import (

@@ -23,7 +23,7 @@ st.markdown(
 
 # ─── Sidebar ─────────────────────────────────────────────────────────
 st.sidebar.markdown("### 🌱 Sustainability ROI Calculator")
-st.sidebar.caption("v2.0.1 · Python 3.12")
+st.sidebar.caption("v2.0.2 · Python 3.12+")
 st.sidebar.markdown("---")
 st.sidebar.markdown("""
 **Pages**
@@ -56,7 +56,6 @@ for Nigerian FMCG manufacturers. Navigate to a page using the sidebar.
 """)
 
 # Quick stats
-import pandas as pd
 
 results_df = adapter.load_results()
 
