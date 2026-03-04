@@ -42,15 +42,27 @@ st.caption(
 results_df = adapter.load_results()
 
 # ── Quick Stats ──────────────────────────────────────────────────────
-col1, col2, col3 = st.columns(3)
-col1.metric("Companies", f"{len(results_df)}")
-col2.metric("Avg Carbon Reduction", f"{results_df['carbon_reduction_pct'].mean():.0f}%")
-col3.metric(
+col1, col2 = st.columns(2)
+with col1:
+    st.metric("Total Cost Increase", f"{cfg.CURRENCY_SYMBOL}{results_df['cost_increase_ngn'].sum():,.0f}")
+    st.metric("Operational Savings", f"{cfg.CURRENCY_SYMBOL}{results_df['operational_savings_ngn'].sum():,.0f}")
+with col2:
+    st.metric("Carbon Reduction", f"{results_df['carbon_reduction_pct'].mean():.0f}%")
+    st.metric("Net Benefits", f"{cfg.CURRENCY_SYMBOL}{results_df['net_benefits_ngn'].sum():,.0f}")
+
+st.metric(
     "Total Net Benefit",
     f"{cfg.CURRENCY_SYMBOL}{results_df['net_annual_impact_ngn'].sum():,.0f}",
 )
 
 st.markdown("---")
+
+# ── Decluttered Quick Wins ──────────────────────────────────────────
+st.subheader("Quick Wins")
+st.markdown(
+    "Identify opportunities for immediate impact by focusing on high ROI materials and processes. "
+    "Use the Material Explorer to evaluate options and prioritize actions."
+)
 
 # ── Key Insight Section ─────────────────────────────────────────────
 st.header("Key Insight")
