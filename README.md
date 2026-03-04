@@ -2,7 +2,7 @@
 
 # 🌱 Sustainability ROI Calculator
 
-### Turn Green Procurement into a Measurable Business Case
+### Transform Green Procurement into a Strategic Business Advantage
 
 <br/>
 
@@ -14,7 +14,7 @@
 
 <br/>
 
-A decision-support analytics engine that quantifies the **financial and environmental trade-offs** of switching from traditional to sustainable materials — purpose-built for Nigerian FMCG manufacturers.
+A comprehensive analytics platform designed to evaluate the **financial and environmental implications** of transitioning from conventional to sustainable materials. This tool is tailored specifically for Nigerian FMCG manufacturers.
 
 <br/>
 
@@ -45,7 +45,7 @@ A decision-support analytics engine that quantifies the **financial and environm
 
 ## 💡 Why This Exists
 
-Sustainability initiatives are typically framed as compliance or CSR. **This tool reframes them as capital allocation decisions** by computing hard numbers:
+Sustainability initiatives are often perceived as compliance-driven or CSR-focused. **This tool repositions them as strategic investment decisions** by providing actionable insights:
 
 <table>
 <tr>
@@ -53,7 +53,7 @@ Sustainability initiatives are typically framed as compliance or CSR. **This too
 
 **The Question**
 
-> _"If we switch to sustainable materials, does it make financial sense — or just environmental sense?"_
+> _"If we transition to sustainable materials, will it be financially viable in addition to being environmentally beneficial?"_
 
 </td>
 <td width="50%">
@@ -73,7 +73,7 @@ Sustainability initiatives are typically framed as compliance or CSR. **This too
 </table>
 
 > [!IMPORTANT]
-> For current demo assumptions, the model shows **strong environmental gains** (~82% carbon reduction) with **negative direct annual ROI** (~−49.6%). This is the honest finding — business viability depends on policy incentives, avoided risk costs, and long-term strategic value.
+> Based on current assumptions, the model demonstrates **significant environmental benefits** (approximately 82% carbon reduction) alongside **negative direct annual ROI** (~49.6%). This underscores the importance of policy incentives, risk mitigation, and long-term strategic planning for business viability.
 
 <br/>
 
@@ -84,34 +84,34 @@ Sustainability initiatives are typically framed as compliance or CSR. **This too
 <td align="center" width="33%">
   <h3>🔬</h3>
   <h4>Deterministic Engine</h4>
-  Seed-based reproducibility ensures identical outputs across runs. Every number is auditable.
+  Ensures reproducible results with seed-based calculations. Every output is fully traceable.
 </td>
 <td align="center" width="33%">
   <h3>🛡️</h3>
   <h4>Typed Contracts</h4>
-  Pydantic models enforce data integrity from ingestion through calculation to output.
+  Pydantic models guarantee data integrity throughout the workflow.
 </td>
 <td align="center" width="33%">
   <h3>🔌</h3>
   <h4>Pluggable Adapters</h4>
-  Abstract <code>DataAdapter</code> interface — swap CSV for database, API, or cloud storage.
+  Modular `DataAdapter` interface allows seamless integration with CSV, databases, APIs, or cloud storage.
 </td>
 </tr>
 <tr>
 <td align="center" width="33%">
   <h3>📊</h3>
   <h4>Executive Dashboard</h4>
-  Interactive Streamlit UI with Plotly charts — aggregate KPIs and per-company deep dives.
+  Interactive Streamlit interface with Plotly visualizations for both aggregate KPIs and detailed company-level insights.
 </td>
 <td align="center" width="33%">
   <h3>🧮</h3>
   <h4>Custom Scenario Builder</h4>
-  Adjust material volumes and economic assumptions in real time. No code required.
+  Enables real-time adjustments to material volumes and economic assumptions without requiring coding expertise.
 </td>
 <td align="center" width="33%">
   <h3>🧪</h3>
   <h4>Regression-Protected</h4>
-  21 tests guard formulas, unit conversions, and output structure. CI enforces on every push.
+  Comprehensive test coverage ensures formula accuracy, unit consistency, and output reliability.
 </td>
 </tr>
 </table>
@@ -125,7 +125,7 @@ Sustainability initiatives are typically framed as compliance or CSR. **This too
 - Python 3.12+
 - pip
 
-### 1. Clone & install
+### 1. Clone and Install
 
 ```bash
 git clone https://github.com/DavidMaco/sustainability_ROI_calculator.git
@@ -133,27 +133,27 @@ cd sustainability_ROI_calculator
 pip install -r requirements.txt
 ```
 
-### 2. Run the pipeline (CLI)
+### 2. Run the Pipeline (CLI)
 
 ```bash
 python -m pipeline.runner
 ```
 
-This generates all data artifacts in `data/` and prints a summary to the console.
+This generates all data artifacts in `data/` and provides a summary in the console.
 
-### 3. Launch the interactive app
+### 3. Launch the Interactive App
 
 ```bash
 streamlit run streamlit_app.py
 ```
 
-Opens a multi-page Streamlit dashboard at `http://localhost:8501` with three pages:
+Access the dashboard at `http://localhost:8501` with the following pages:
 
 | Page | Purpose |
 |:---|:---|
-| **📊 Executive Dashboard** | Aggregate KPIs, cost comparison charts, savings pie breakdown |
-| **🔍 Material Explorer** | Side-by-side material comparison, carbon reduction potential, quick wins |
-| **🧮 Custom Scenario** | Build your own procurement mix, adjust assumptions, see instant ROI |
+| **📊 Executive Dashboard** | Aggregate KPIs, cost comparison charts, and savings breakdown |
+| **🔍 Material Explorer** | Compare materials side-by-side, evaluate carbon reduction potential, and identify quick wins |
+| **🧮 Custom Scenario** | Customize procurement mixes, adjust assumptions, and view instant ROI insights |
 
 <br/>
 
