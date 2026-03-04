@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+
+# Generated data artifacts
+data/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing / quality
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Legacy root files (archived in legacy/)
+analyze_sustainability.py
+generate_sustainability_data.py
+PROJECT3_README.md
+sustainability_materials_comparison.csv
+sustainability_roi_analysis.csv
+sustainability_calculator_template.csv
+sustainability_summary.json
+company_scenarios.csv

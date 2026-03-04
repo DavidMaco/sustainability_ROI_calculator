@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sustainability-roi-calculator"
+version = "2.0.1"
+description = "Sustainability ROI Calculator for Manufacturing — proving ESG delivers financial returns"
+requires-python = ">=3.12"
+
+[tool.black]
+line-length = 120
+target-version = ["py312"]
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | __pycache__
+  | data
+  | legacy
+  | \.pytest_cache
+  | analyze_sustainability\.py
+  | generate_sustainability_data\.py
+)/
+'''
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501", "E402", "F401"]
+exclude = ["__pycache__", ".venv", "data", "legacy", "analyze_sustainability.py", "generate_sustainability_data.py"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["domain", "ingestion", "pipeline"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
