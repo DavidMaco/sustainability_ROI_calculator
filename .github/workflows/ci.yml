@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONUTF8: "1"
+      SUST_ENV: "development"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest ruff black
+
+      - name: Lint (ruff)
+        run: ruff check . --config pyproject.toml
+
+      - name: Format check (black)
+        run: black --check --config pyproject.toml .
+
+      - name: Run pipeline smoke test
+        run: python -m pipeline.runner
+
+      - name: Validate generated artifacts
+        run: |
+          test -f data/sustainability_materials_comparison.csv
+          test -f data/company_scenarios.csv
+          test -f data/sustainability_roi_analysis.csv
+          test -f data/sustainability_summary.json
+          test -f data/sustainability_calculator_template.csv
+
+      - name: Run tests
+        run: pytest tests -q
+
+      - name: Upload pipeline artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sustainability-roi-artifacts
+          path: |
+            data/sustainability_roi_analysis.csv
+            data/sustainability_summary.json
+            data/sustainability_calculator_template.csv
+          if-no-files-found: warn
