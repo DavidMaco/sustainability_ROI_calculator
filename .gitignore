@@ -29,6 +29,18 @@ coverage.xml
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Environment
+*.env
+.env.*
+
+# Logs
+*.log
+
+# Type checking
+.mypy_cache/
+Thumbs.db
 
 # Legacy root files (archived in legacy/)
 analyze_sustainability.py
