@@ -1,8 +1,9 @@
-# Production Readiness — Sustainability ROI Calculator v2.0.2
+# Production Readiness - Sustainability ROI Calculator v2.0.2
 
 ## Status: Pilot-Ready
 
 ### Ready
+
 - [x] Modular package architecture (domain / ingestion / pipeline / pages)
 - [x] Typed data contracts (Pydantic models)
 - [x] Centralised, env-driven configuration with production guard
@@ -19,6 +20,7 @@
 - [x] MIT License
 
 ### Remaining for Full Production
+
 - [ ] Authentication / RBAC on Streamlit
 - [ ] Secrets management (Streamlit Cloud secrets or vault)
 - [ ] Observability (structured log aggregation, health endpoint)

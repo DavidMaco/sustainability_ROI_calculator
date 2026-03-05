@@ -1,9 +1,9 @@
-# Migration Notes — v1 → v2
+# Migration Notes - v1 -> v2
 
 ## Legacy → New Module Mapping
 
 | Legacy File | New Location | Notes |
-|---|---|---|
+| --- | --- | --- |
 | `generate_sustainability_data.py` | `domain/materials.py` + `domain/scenarios.py` + `pipeline/runner.py` | Split into pure domain logic + orchestration |
 | `analyze_sustainability.py` | `domain/scenarios.py` + `domain/recommendations.py` + Streamlit pages | Split into services + presentation |
 | Root-level CSV outputs | `data/` directory | All artifacts now under `data/` |
@@ -23,11 +23,13 @@ All ROI formulas are **unchanged** in structure; v2.0.1 corrected the unit conve
 - `Payback = |Cost Increase| / Operational Savings`
 
 ## Breaking Changes
+
 - Output files now live in `data/` (not project root)
 - `materials_mix` column in `company_scenarios.csv` is now valid JSON (not Python repr)
 - Python 3.12+ required (was unspecified)
 
 ## How to Run
+
 ```bash
 # CLI batch mode
 python -m pipeline.runner
