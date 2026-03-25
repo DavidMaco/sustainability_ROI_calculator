@@ -1,7 +1,13 @@
-# Sustainability ROI Calculator — Copilot Instructions
+﻿# Sustainability ROI Calculator — Copilot Instructions
 
 Python analytics tool for calculating sustainability ROI metrics across
 materials and procurement scenarios. Python 3.12, `pipeline/` module, ruff + black.
+
+## Mandatory Workflow
+
+1. Plan before editing.
+2. Keep changes scoped to root cause.
+3. Verify before completion.
 
 ## Verification Gates
 
@@ -9,6 +15,7 @@ materials and procurement scenarios. Python 3.12, `pipeline/` module, ruff + bla
 ruff check . --config pyproject.toml
 black --check --config pyproject.toml .
 pytest tests -q
+python -m pyright
 ```
 
 ### Pipeline Smoke Test
@@ -17,11 +24,15 @@ pytest tests -q
 python -m pipeline.runner
 ```
 
+Use only the commands available in this repo environment.
+
 ## Security Standards (non-negotiable)
 
 - **Never** add `os.environ.get("VAR", "fallback-secret")` — raise `RuntimeError` if missing
 - No secrets or credentials in source code
 - No hardcoded file paths to production data
+- No raw exception leakage to users
+- Keep logging structured and non-sensitive
 
 ## Code Standards
 

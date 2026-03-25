@@ -24,6 +24,7 @@ docs/        Project documentation
 1. Run the verification gate for the changed layer
 2. Run `get_errors` on all modified files
 3. Fix all errors before reporting done
+4. Summarize change, risk, and validation
 
 ## Verification Gates
 
@@ -33,6 +34,7 @@ docs/        Project documentation
 ruff check . --config pyproject.toml
 black --check --config pyproject.toml .
 pytest tests -q
+python -m pyright
 ```
 
 ### Pipeline Smoke Test
@@ -46,12 +48,14 @@ python -m pipeline.runner
 - No `os.environ.get("VAR", "fallback")` for secrets — raise `RuntimeError`
 - No credentials in source code
 - No hardcoded production file paths
+- Do not leak internal errors in client responses
+- Prefer root-cause fixes over broad refactors
 
 ## CI / Standards Governance
 
 The `standards-governance` job in `.github/workflows/python-app.yml` enforces:
 
-- All 12 standards baseline files present
+- Standards baseline files present
 - Security pattern scan
 
 ## Skills Available
