@@ -23,6 +23,8 @@
 - [x] Session timeout controls for authenticated sessions
 - [x] Artifact backup + checksum manifest versioning (`data/backups/`)
 - [x] Health check script for app + artifact readiness
+- [x] CI runtime gates for health endpoint and lightweight load probe
+- [x] Managed auth secret file support (`SUST_AUTH_USERS_FILE`)
 
 ### Remaining for Full Production
 
@@ -31,5 +33,5 @@
 - [ ] Load testing for Streamlit under concurrent users
 - [ ] External data connector (API / DB adapter)
 - [ ] NPV / multi-year discounted analysis
-- [ ] Automated load-test gating in CI/CD
+- [ ] Expanded performance thresholds and trend dashboards in CI/CD
 - [ ] Kubernetes manifests for orchestrated deployment

@@ -74,6 +74,8 @@ The test suite validates formulas, unit conversions, and output structure to red
 
 Built-in authentication supports `viewer`, `analyst`, and `admin` roles. The app can load users from Streamlit secrets or environment variables.
 
+In production, weak placeholder passwords are rejected. For managed deployments, mount a JSON secret file and set `SUST_AUTH_USERS_FILE`.
+
 ### 🗃 Artifact Backups
 
 Each pipeline run can generate timestamped zip backups and checksum manifests under `data/backups/` for auditability and rollback.
@@ -219,6 +221,8 @@ docker compose up --build
 ```
 
 Before enabling auth in production, create `.streamlit/secrets.toml` from `.streamlit/secrets.toml.example` and set real credentials.
+
+CI now enforces runtime gates by starting Streamlit, checking `/_stcore/health`, and running both `scripts/healthcheck.py` and `scripts/load_test.py`.
 
 ## 🔄 CI/CD
 

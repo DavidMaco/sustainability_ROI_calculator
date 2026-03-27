@@ -48,6 +48,29 @@ jobs:
       - name: Run tests
         run: pytest tests -q
 
+      - name: Start Streamlit for runtime checks
+        run: |
+          streamlit run streamlit_app.py --server.headless true --server.address 127.0.0.1 --server.port 8501 > streamlit.log 2>&1 &
+
+      - name: Wait for app health endpoint
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:8501/_stcore/health >/dev/null; then
+              echo "Health endpoint is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "App did not become healthy in time"
+          tail -n 120 streamlit.log || true
+          exit 1
+
+      - name: Enforce health and data readiness check
+        run: python scripts/healthcheck.py
+
+      - name: Enforce lightweight load gate
+        run: python scripts/load_test.py
+
       - name: Upload pipeline artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -57,4 +80,5 @@ jobs:
             data/sustainability_roi_analysis.csv
             data/sustainability_summary.json
             data/sustainability_calculator_template.csv
+            streamlit.log
           if-no-files-found: warn

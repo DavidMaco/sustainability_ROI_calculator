@@ -7,6 +7,7 @@ import os
 import time
 from dataclasses import dataclass
 from hmac import compare_digest
+from pathlib import Path
 
 import streamlit as st
 
@@ -20,6 +21,24 @@ class AppUser:
     username: str
     password: str
     role: str
+
+
+def _is_weak_password(password: str) -> bool:
+    lowered = password.lower()
+    weak_tokens = ["changeme", "change_me", "password", "12345", "admin", "qwerty"]
+    return len(password) < 10 or any(token in lowered for token in weak_tokens)
+
+
+def _validate_auth_config(users: list[AppUser]) -> None:
+    if not cfg.is_production():
+        return
+    weak = [user.username for user in users if _is_weak_password(user.password)]
+    if weak:
+        user_list = ", ".join(sorted(weak))
+        raise RuntimeError(
+            "Weak auth credentials are not allowed in production. "
+            f"Rotate passwords for: {user_list}."
+        )
 
 
 def _to_users(raw_users: list[dict[str, str]]) -> list[AppUser]:
@@ -44,7 +63,21 @@ def _load_users() -> list[AppUser]:
         if users:
             return users
 
-    # 2) JSON env variable for multi-user local deployments
+    # 2) Mounted secrets file (JSON array)
+    users_file = os.getenv("SUST_AUTH_USERS_FILE", "").strip()
+    if users_file:
+        path = Path(users_file)
+        if path.exists():
+            try:
+                parsed = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(parsed, list):
+                    users = _to_users(parsed)
+                    if users:
+                        return users
+            except json.JSONDecodeError:
+                pass
+
+    # 3) JSON env variable for multi-user local deployments
     raw_env_users = os.getenv("SUST_AUTH_USERS_JSON", "").strip()
     if raw_env_users:
         try:
@@ -56,7 +89,7 @@ def _load_users() -> list[AppUser]:
         except json.JSONDecodeError:
             pass
 
-    # 3) Single-user fallback
+    # 4) Single-user fallback
     username = os.getenv("SUST_APP_USERNAME", "").strip()
     password = os.getenv("SUST_APP_PASSWORD", "").strip()
     role = os.getenv("SUST_APP_ROLE", "admin").strip().lower()
@@ -117,6 +150,12 @@ def require_login() -> None:
             "Authentication is enabled but no users are configured. "
             "Set Streamlit secrets.auth_users or SUST_APP_USERNAME/SUST_APP_PASSWORD."
         )
+        st.stop()
+
+    try:
+        _validate_auth_config(users)
+    except RuntimeError as exc:
+        st.error(str(exc))
         st.stop()
 
     if _session_expired():

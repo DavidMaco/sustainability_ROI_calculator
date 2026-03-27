@@ -4,13 +4,11 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 from pathlib import Path
 from urllib.error import URLError
 from urllib.request import urlopen
 
 import config as cfg
-
 
 REQUIRED_ARTIFACTS = [
     "sustainability_materials_comparison.csv",
