@@ -9,6 +9,7 @@ patches:
   - path: patch-deployment.yaml
   - path: patch-hpa.yaml
   - path: patch-ingress.yaml
+  - path: patch-fluent-bit-loki.yaml
 
 images:
   - name: ghcr.io/davidmaco/sustainability-roi-calculator

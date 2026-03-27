@@ -34,8 +34,8 @@
 
 ### Remaining for Full Production
 
-- [ ] Secrets management (Streamlit Cloud secrets or vault)
-- [ ] Production log sink integration and dashboards (ELK/Grafana/Loki)
+- [x] Secrets management (Vault / AWS SM / GCP SM adapter with env fallback)
+- [x] Production log sink integration and dashboards (Loki via Fluent Bit in production overlay)
 - [ ] Load testing for Streamlit under concurrent users
 - [ ] External data connector (API / DB adapter)
 - [ ] NPV / multi-year discounted analysis
