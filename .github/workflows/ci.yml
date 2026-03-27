@@ -39,15 +39,23 @@ jobs:
         with:
           version: v1.30.0
 
+      - name: Install kubeconform
+        run: |
+          KUBECONFORM_VERSION=v0.6.7
+          curl -fsSL -o /tmp/kubeconform.tar.gz "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz"
+          tar -xzf /tmp/kubeconform.tar.gz -C /tmp
+          sudo mv /tmp/kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
+
       - name: Validate Kubernetes base and overlays
         run: |
           kubectl kustomize k8s/base > /tmp/k8s-base.yaml
           kubectl kustomize k8s/overlays/staging > /tmp/k8s-staging.yaml
           kubectl kustomize k8s/overlays/production > /tmp/k8s-production.yaml
 
-          kubectl apply --dry-run=client --validate=false -f /tmp/k8s-base.yaml
-          kubectl apply --dry-run=client --validate=false -f /tmp/k8s-staging.yaml
-          kubectl apply --dry-run=client --validate=false -f /tmp/k8s-production.yaml
+          kubeconform -summary -strict -ignore-missing-schemas /tmp/k8s-base.yaml
+          kubeconform -summary -strict -ignore-missing-schemas /tmp/k8s-staging.yaml
+          kubeconform -summary -strict -ignore-missing-schemas /tmp/k8s-production.yaml
 
       - name: Run pipeline smoke test
         run: python -m pipeline.runner
