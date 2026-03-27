@@ -13,6 +13,15 @@ spec:
       labels:
         app: sustainability-roi
     spec:
+      serviceAccountName: sustainability-roi-sa
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: app
           image: ghcr.io/davidmaco/sustainability-roi-calculator:latest
@@ -47,6 +56,10 @@ spec:
             limits:
               cpu: "1000m"
               memory: "1Gi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           volumeMounts:
             - name: app-data
               mountPath: /app/data
@@ -64,6 +77,10 @@ spec:
                 name: sustainability-roi-config
             - secretRef:
                 name: sustainability-roi-secret
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           volumeMounts:
             - name: app-data
               mountPath: /app/data
@@ -73,6 +90,10 @@ spec:
           image: cr.fluentbit.io/fluent/fluent-bit:3.0
           imagePullPolicy: IfNotPresent
           args: ["-c", "/fluent-bit/etc/fluent-bit.conf"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           volumeMounts:
             - name: app-logs
               mountPath: /var/log/app

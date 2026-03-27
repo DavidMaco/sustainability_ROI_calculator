@@ -260,7 +260,14 @@ kubectl apply -k k8s/overlays/production
 The deployment includes a Fluent Bit sidecar that tails application logs from `/var/log/app` and forwards them to stdout by default.
 Replace output settings in `k8s/logging/fluent-bit-configmap.yaml` for Elasticsearch or Loki in production.
 
+Security hardening included in base manifests:
+
+- Dedicated service account with token automount disabled
+- Pod and container security contexts (non-root, dropped Linux capabilities)
+- Default-deny network policy with explicit ingress and egress allow lists
+
 CI now enforces runtime gates by starting Streamlit, checking `/_stcore/health`, and running both `scripts/healthcheck.py` and `scripts/load_test.py`.
+It also validates Kubernetes base plus staging and production overlays via `kubectl kustomize` and client-side dry-run apply.
 
 ## 🔄 CI/CD
 

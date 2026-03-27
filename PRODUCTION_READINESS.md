@@ -29,6 +29,8 @@
 - [x] Kubernetes manifest baseline (namespace, deployment, service, PVC, HPA, ingress)
 - [x] Kubernetes Kustomize overlays for staging and production
 - [x] Centralized log shipping baseline via Fluent Bit sidecar config
+- [x] Kubernetes policy hardening baseline (service account, security context, network policies)
+- [x] CI manifest validation for base and overlays (`kubectl kustomize` + dry-run apply)
 
 ### Remaining for Full Production
 
@@ -38,4 +40,4 @@
 - [ ] External data connector (API / DB adapter)
 - [ ] NPV / multi-year discounted analysis
 - [ ] Expanded performance thresholds and trend dashboards in CI/CD
-- [ ] Environment-specific policy hardening (NetworkPolicy, PodSecurity, RBAC service accounts)
+- [ ] Policy admission enforcement (OPA Gatekeeper/Kyverno) and signed image policies

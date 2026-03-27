@@ -34,6 +34,21 @@ jobs:
       - name: Format check (black)
         run: black --check --config pyproject.toml .
 
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.30.0
+
+      - name: Validate Kubernetes base and overlays
+        run: |
+          kubectl kustomize k8s > /tmp/k8s-base.yaml
+          kubectl kustomize k8s/overlays/staging > /tmp/k8s-staging.yaml
+          kubectl kustomize k8s/overlays/production > /tmp/k8s-production.yaml
+
+          kubectl apply --dry-run=client -f /tmp/k8s-base.yaml
+          kubectl apply --dry-run=client -f /tmp/k8s-staging.yaml
+          kubectl apply --dry-run=client -f /tmp/k8s-production.yaml
+
       - name: Run pipeline smoke test
         run: python -m pipeline.runner
 

@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
+  - serviceaccount.yaml
   - configmap.yaml
   - secret.example.yaml
   - pvc.yaml
@@ -10,4 +11,7 @@ resources:
   - service.yaml
   - hpa.yaml
   - ingress.yaml
+  - networkpolicy-default-deny.yaml
+  - networkpolicy-allow-ingress.yaml
+  - networkpolicy-allow-egress.yaml
   - logging/fluent-bit-configmap.yaml
