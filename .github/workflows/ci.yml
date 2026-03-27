@@ -41,7 +41,7 @@ jobs:
 
       - name: Validate Kubernetes base and overlays
         run: |
-          kubectl kustomize k8s > /tmp/k8s-base.yaml
+          kubectl kustomize k8s/base > /tmp/k8s-base.yaml
           kubectl kustomize k8s/overlays/staging > /tmp/k8s-staging.yaml
           kubectl kustomize k8s/overlays/production > /tmp/k8s-production.yaml
 
