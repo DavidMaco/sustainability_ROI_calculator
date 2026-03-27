@@ -99,8 +99,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(404)
         self.end_headers()
 
-    def log_message(self, fmt: str, *args: object) -> None:
-        cfg.logger.info('metrics_server %s - "%s"', self.address_string(), fmt % args)
+    def log_message(self, format: str, *args: object) -> None:
+        cfg.logger.info('metrics_server %s - "%s"', self.address_string(), format % args)
 
 
 def main() -> int:

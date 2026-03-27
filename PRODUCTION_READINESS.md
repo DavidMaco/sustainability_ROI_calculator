@@ -9,7 +9,7 @@
 - [x] Centralised, env-driven configuration with production guard
 - [x] Extensible ingestion layer (CSV adapter, pluggable)
 - [x] Unit + integration test suite (21 tests, pytest)
-- [x] CI/CD pipeline (lint + format + smoke test + pytest)
+- [x] CI/CD pipeline (lint + format + smoke test + pytest + scoped pyright gate)
 - [x] Streamlit multi-page UI
 - [x] Deterministic reproducibility (seeded generation)
 - [x] JSON-safe serialisation (no Python dict strings in CSV)
