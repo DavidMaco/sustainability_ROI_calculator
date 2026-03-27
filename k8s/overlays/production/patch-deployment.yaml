@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sustainability-roi
+  namespace: sustainability-roi
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: app
+          resources:
+            requests:
+              cpu: "400m"
+              memory: "768Mi"
+            limits:
+              cpu: "1500m"
+              memory: "2Gi"

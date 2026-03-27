@@ -245,6 +245,21 @@ kubectl apply -f k8s/ingress.yaml
 
 Update hostnames, image tags, and secret values before using manifests in non-local environments.
 
+### Kubernetes overlays (staging and production)
+
+```bash
+# Preview manifests
+kubectl kustomize k8s/overlays/staging
+kubectl kustomize k8s/overlays/production
+
+# Apply environment-specific manifests
+kubectl apply -k k8s/overlays/staging
+kubectl apply -k k8s/overlays/production
+```
+
+The deployment includes a Fluent Bit sidecar that tails application logs from `/var/log/app` and forwards them to stdout by default.
+Replace output settings in `k8s/logging/fluent-bit-configmap.yaml` for Elasticsearch or Loki in production.
+
 CI now enforces runtime gates by starting Streamlit, checking `/_stcore/health`, and running both `scripts/healthcheck.py` and `scripts/load_test.py`.
 
 ## 🔄 CI/CD

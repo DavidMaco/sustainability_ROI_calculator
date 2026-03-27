@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sustainability-roi-config
+  namespace: sustainability-roi
+data:
+  SUST_ENV: "production"
+  SUST_LOG_LEVEL: "INFO"
+  SUST_SESSION_TIMEOUT_MINUTES: "30"
+  SUST_ARTIFACT_BACKUP_RETENTION: "30"

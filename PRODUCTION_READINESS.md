@@ -27,13 +27,15 @@
 - [x] Managed auth secret file support (`SUST_AUTH_USERS_FILE`)
 - [x] Prometheus-style `/metrics` and `/healthz` observability endpoint
 - [x] Kubernetes manifest baseline (namespace, deployment, service, PVC, HPA, ingress)
+- [x] Kubernetes Kustomize overlays for staging and production
+- [x] Centralized log shipping baseline via Fluent Bit sidecar config
 
 ### Remaining for Full Production
 
 - [ ] Secrets management (Streamlit Cloud secrets or vault)
-- [ ] Centralized log shipping + dashboarding (ELK/Grafana/Loki)
+- [ ] Production log sink integration and dashboards (ELK/Grafana/Loki)
 - [ ] Load testing for Streamlit under concurrent users
 - [ ] External data connector (API / DB adapter)
 - [ ] NPV / multi-year discounted analysis
 - [ ] Expanded performance thresholds and trend dashboards in CI/CD
-- [ ] Environment-specific hardened Kubernetes overlays (staging/prod)
+- [ ] Environment-specific policy hardening (NetworkPolicy, PodSecurity, RBAC service accounts)

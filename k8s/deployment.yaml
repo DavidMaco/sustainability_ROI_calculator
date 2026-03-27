@@ -17,6 +17,7 @@ spec:
         - name: app
           image: ghcr.io/davidmaco/sustainability-roi-calculator:latest
           imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "streamlit run streamlit_app.py --server.address=0.0.0.0 --server.port=8501 2>&1 | tee /var/log/app/streamlit.log"]
           ports:
             - containerPort: 8501
               name: http
@@ -49,6 +50,8 @@ spec:
           volumeMounts:
             - name: app-data
               mountPath: /app/data
+            - name: app-logs
+              mountPath: /var/log/app
         - name: metrics
           image: ghcr.io/davidmaco/sustainability-roi-calculator:latest
           imagePullPolicy: IfNotPresent
@@ -64,7 +67,23 @@ spec:
           volumeMounts:
             - name: app-data
               mountPath: /app/data
+            - name: app-logs
+              mountPath: /var/log/app
+        - name: log-forwarder
+          image: cr.fluentbit.io/fluent/fluent-bit:3.0
+          imagePullPolicy: IfNotPresent
+          args: ["-c", "/fluent-bit/etc/fluent-bit.conf"]
+          volumeMounts:
+            - name: app-logs
+              mountPath: /var/log/app
+            - name: fluent-bit-config
+              mountPath: /fluent-bit/etc
       volumes:
         - name: app-data
           persistentVolumeClaim:
             claimName: sustainability-roi-data
+        - name: app-logs
+          emptyDir: {}
+        - name: fluent-bit-config
+          configMap:
+            name: sustainability-roi-fluent-bit-config
