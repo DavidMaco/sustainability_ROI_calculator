@@ -15,6 +15,7 @@ def _is_truthy(value: str | None, *, default: bool = False) -> bool:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
+
 # ─── Runtime ─────────────────────────────────────────────────────────
 ENV = os.getenv("SUST_ENV", "development").lower()  # development | staging | production
 LOG_LEVEL = os.getenv("SUST_LOG_LEVEL", "INFO").upper()

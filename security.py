@@ -36,8 +36,7 @@ def _validate_auth_config(users: list[AppUser]) -> None:
     if weak:
         user_list = ", ".join(sorted(weak))
         raise RuntimeError(
-            "Weak auth credentials are not allowed in production. "
-            f"Rotate passwords for: {user_list}."
+            "Weak auth credentials are not allowed in production. " f"Rotate passwords for: {user_list}."
         )
 
 
