@@ -25,13 +25,15 @@
 - [x] Health check script for app + artifact readiness
 - [x] CI runtime gates for health endpoint and lightweight load probe
 - [x] Managed auth secret file support (`SUST_AUTH_USERS_FILE`)
+- [x] Prometheus-style `/metrics` and `/healthz` observability endpoint
+- [x] Kubernetes manifest baseline (namespace, deployment, service, PVC, HPA, ingress)
 
 ### Remaining for Full Production
 
 - [ ] Secrets management (Streamlit Cloud secrets or vault)
-- [ ] Observability (structured log aggregation, health endpoint)
+- [ ] Centralized log shipping + dashboarding (ELK/Grafana/Loki)
 - [ ] Load testing for Streamlit under concurrent users
 - [ ] External data connector (API / DB adapter)
 - [ ] NPV / multi-year discounted analysis
 - [ ] Expanded performance thresholds and trend dashboards in CI/CD
-- [ ] Kubernetes manifests for orchestrated deployment
+- [ ] Environment-specific hardened Kubernetes overlays (staging/prod)

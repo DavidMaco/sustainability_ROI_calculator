@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sustainability-roi
+  namespace: sustainability-roi
+spec:
+  selector:
+    app: sustainability-roi
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8501
+    - name: metrics
+      port: 9108
+      targetPort: 9108
+  type: ClusterIP

@@ -53,6 +53,10 @@ SESSION_TIMEOUT_MINUTES = int(os.getenv("SUST_SESSION_TIMEOUT_MINUTES", "30"))
 ENABLE_ARTIFACT_BACKUP = _is_truthy(os.getenv("SUST_ENABLE_ARTIFACT_BACKUP"), default=True)
 ARTIFACT_BACKUP_RETENTION = int(os.getenv("SUST_ARTIFACT_BACKUP_RETENTION", "20"))
 
+# ─── Observability Endpoint ─────────────────────────────────────────
+METRICS_HOST = os.getenv("SUST_METRICS_HOST", "0.0.0.0")
+METRICS_PORT = int(os.getenv("SUST_METRICS_PORT", "9108"))
+
 
 def is_production() -> bool:
     return ENV == "production"
@@ -67,4 +71,5 @@ def validate_runtime_settings() -> None:
     assert WASTE_COST_NGN_PER_TON > 0, "Waste cost must be positive in production"
     assert SESSION_TIMEOUT_MINUTES > 0, "Session timeout must be positive in production"
     assert ARTIFACT_BACKUP_RETENTION > 0, "Backup retention must be positive in production"
+    assert METRICS_PORT > 0, "Metrics port must be positive in production"
     logger.info("Runtime settings validated for production")

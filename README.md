@@ -211,7 +211,15 @@ python scripts/healthcheck.py
 
 # Baseline concurrent load probe
 python scripts/load_test.py
+
+# Metrics and readiness endpoint (for central observability)
+python scripts/metrics_server.py
 ```
+
+Metrics server endpoints:
+
+- `/healthz`: JSON readiness response and missing artifact list
+- `/metrics`: Prometheus-style gauges for data readiness, backups, and summary KPIs
 
 ### Container deployment
 
@@ -221,6 +229,21 @@ docker compose up --build
 ```
 
 Before enabling auth in production, create `.streamlit/secrets.toml` from `.streamlit/secrets.toml.example` and set real credentials.
+
+### Kubernetes deployment baseline
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/secret.example.yaml
+kubectl apply -f k8s/pvc.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl apply -f k8s/hpa.yaml
+kubectl apply -f k8s/ingress.yaml
+```
+
+Update hostnames, image tags, and secret values before using manifests in non-local environments.
 
 CI now enforces runtime gates by starting Streamlit, checking `/_stcore/health`, and running both `scripts/healthcheck.py` and `scripts/load_test.py`.
 
