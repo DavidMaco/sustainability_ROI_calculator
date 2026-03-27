@@ -70,6 +70,14 @@ Analysts can adjust procurement mix and economic assumptions in real time withou
 
 The test suite validates formulas, unit conversions, and output structure to reduce model drift and unintended regressions.
 
+### 🔐 Access Control (RBAC)
+
+Built-in authentication supports `viewer`, `analyst`, and `admin` roles. The app can load users from Streamlit secrets or environment variables.
+
+### 🗃 Artifact Backups
+
+Each pipeline run can generate timestamped zip backups and checksum manifests under `data/backups/` for auditability and rollback.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -192,6 +200,25 @@ Current tests cover:
 - Input validation behavior for unsupported materials.
 - End-to-end artifact generation and determinism.
 - JSON serialization and deserialization integrity.
+
+### Operations checks
+
+```bash
+# App + data readiness health check
+python scripts/healthcheck.py
+
+# Baseline concurrent load probe
+python scripts/load_test.py
+```
+
+### Container deployment
+
+```bash
+# Build and run
+docker compose up --build
+```
+
+Before enabling auth in production, create `.streamlit/secrets.toml` from `.streamlit/secrets.toml.example` and set real credentials.
 
 ## 🔄 CI/CD
 

@@ -6,10 +6,13 @@ import streamlit as st
 
 import config as cfg
 from ingestion.csv_adapter import CsvAdapter
+from security import require_login, require_role
 from ui_theme import CARBON_PAIR, COMPARISON_PAIR, SAVINGS_COLOURS, apply_theme
 
 st.set_page_config(page_title="Executive Dashboard", page_icon="📊", layout="wide")
 apply_theme()
+require_login()
+require_role("viewer")
 
 st.title("📊 Executive Dashboard")
 st.caption("Aggregate financial and environmental impact across all company scenarios.")

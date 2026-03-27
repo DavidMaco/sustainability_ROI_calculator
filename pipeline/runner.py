@@ -17,6 +17,7 @@ from domain.scenarios import (
 )
 from ingestion.base import DataAdapter
 from ingestion.csv_adapter import CsvAdapter
+from pipeline.backup import create_artifact_backup
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,13 @@ def run_pipeline(adapter: DataAdapter | None = None) -> None:
     adapter.save_summary(summary.model_dump())
     adapter.save_calculator_template(build_material_comparison_table(materials_df))
 
+    if cfg.ENABLE_ARTIFACT_BACKUP:
+        backup = create_artifact_backup(adapter.data_dir, retention=cfg.ARTIFACT_BACKUP_RETENTION)
+        if backup:
+            zip_path, manifest_path = backup
+            logger.info("  Created backup: %s", zip_path.name)
+            logger.info("  Created manifest: %s", manifest_path.name)
+
     elapsed = time.perf_counter() - start
     logger.info("Pipeline complete in %.2fs — artifacts in %s", elapsed, adapter.data_dir)
 
@@ -77,6 +85,8 @@ def run_pipeline(adapter: DataAdapter | None = None) -> None:
         _safe_print(f"  Achieves Target: {'YES' if r.achieves_target else 'NO'}")
     _safe_print("\n" + "=" * 80)
     _safe_print("Pipeline complete — all artifacts saved to:", adapter.data_dir)
+    if cfg.ENABLE_ARTIFACT_BACKUP:
+        _safe_print("Backups are stored in:", adapter.data_dir / "backups")
     _safe_print("=" * 80)
 
 

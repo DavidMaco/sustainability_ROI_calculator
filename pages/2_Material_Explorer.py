@@ -5,10 +5,13 @@ import streamlit as st
 
 from domain.recommendations import build_material_comparison_table, identify_quick_wins
 from ingestion.csv_adapter import CsvAdapter
+from security import require_login, require_role
 from ui_theme import BRAND_GREEN, apply_theme
 
 st.set_page_config(page_title="Material Explorer", page_icon="🔍", layout="wide")
 apply_theme()
+require_login()
+require_role("viewer")
 
 st.title("🔍 Material Explorer")
 st.caption("Side-by-side comparison of traditional vs sustainable material options across all categories.")

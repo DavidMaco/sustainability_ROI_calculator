@@ -22,8 +22,11 @@ st.sidebar.caption("v2.0.2 · Python 3.12+")
 # ─── Ensure data exists ─────────────────────────────────────────────
 import config as cfg  # noqa: E402
 from ingestion.csv_adapter import CsvAdapter  # noqa: E402
+from security import require_login, require_role  # noqa: E402
 
 adapter = CsvAdapter()
+require_login()
+require_role("viewer")
 data_ready = (cfg.DATA_DIR / "sustainability_roi_analysis.csv").exists()
 
 if not data_ready:

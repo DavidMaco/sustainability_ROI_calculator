@@ -9,6 +9,7 @@ import streamlit as st
 import config as cfg
 from domain.scenarios import calculate_custom_scenario
 from ingestion.csv_adapter import CsvAdapter
+from security import require_login, require_role
 from ui_theme import SAVINGS_COLOURS, apply_theme
 
 
@@ -23,6 +24,8 @@ class EconomicAssumptions:
 
 st.set_page_config(page_title="Custom Scenario", page_icon="🧮", layout="wide")
 apply_theme()
+require_login()
+require_role("analyst")
 
 st.title("🧮 Custom Scenario Builder")
 st.caption("Enter your annual procurement volumes and adjust economic assumptions to see instant ROI.")

@@ -73,3 +73,14 @@ def test_scenarios_csv_has_json_materials_mix(tmp_data_dir: Path):
     for raw in df["materials_mix"]:
         parsed = json.loads(raw)  # Must not raise
         assert isinstance(parsed, dict)
+
+
+def test_pipeline_creates_backup_bundle_and_manifest(tmp_data_dir: Path):
+    """Pipeline should version artifacts into timestamped backup bundles."""
+    adapter = CsvAdapter(data_dir=tmp_data_dir)
+    run_pipeline(adapter)
+
+    backup_dir = tmp_data_dir / "backups"
+    assert backup_dir.exists()
+    assert any(backup_dir.glob("artifacts_*.zip"))
+    assert any(backup_dir.glob("artifacts_*.manifest.json"))

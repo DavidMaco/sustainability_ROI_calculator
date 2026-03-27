@@ -18,14 +18,18 @@
 - [x] Input validation with clear error messages for unknown materials
 - [x] Unicode-safe console output on Windows terminals
 - [x] MIT License
+- [x] Dockerfile and docker-compose deployment baseline
+- [x] Authentication and RBAC guardrails for Streamlit pages
+- [x] Session timeout controls for authenticated sessions
+- [x] Artifact backup + checksum manifest versioning (`data/backups/`)
+- [x] Health check script for app + artifact readiness
 
 ### Remaining for Full Production
 
-- [ ] Authentication / RBAC on Streamlit
 - [ ] Secrets management (Streamlit Cloud secrets or vault)
 - [ ] Observability (structured log aggregation, health endpoint)
-- [ ] Backup / versioning of output artifacts
 - [ ] Load testing for Streamlit under concurrent users
 - [ ] External data connector (API / DB adapter)
 - [ ] NPV / multi-year discounted analysis
-- [ ] Docker containerisation
+- [ ] Automated load-test gating in CI/CD
+- [ ] Kubernetes manifests for orchestrated deployment

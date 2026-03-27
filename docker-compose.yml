@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  sustainability-roi:
+    build: .
+    container_name: sustainability-roi
+    ports:
+      - "8501:8501"
+    environment:
+      SUST_ENV: production
+      SUST_LOG_LEVEL: INFO
+      SUST_AUTH_ENABLED: "1"
+      SUST_SESSION_TIMEOUT_MINUTES: "30"
+      SUST_ENABLE_ARTIFACT_BACKUP: "1"
+      SUST_ARTIFACT_BACKUP_RETENTION: "20"
+    volumes:
+      - ./data:/app/data
+      - ./.streamlit:/app/.streamlit:ro
+    restart: unless-stopped
