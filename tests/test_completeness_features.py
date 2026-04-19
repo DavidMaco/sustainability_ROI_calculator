@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import tempfile
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import pandas as pd
@@ -11,6 +14,7 @@ import pytest
 import config as cfg
 from domain.materials import generate_material_profiles
 from domain.scenarios import calculate_custom_scenario, calculate_scenario_impacts, generate_company_scenarios_df
+from ingestion.external_api_adapter import ExternalApiAdapter
 from ingestion.factory import get_data_adapter
 from ingestion.sqlite_adapter import SQLiteAdapter
 
@@ -24,11 +28,13 @@ def test_scenario_results_include_npv(materials_df: pd.DataFrame):
     scenarios_df = generate_company_scenarios_df()
     results = calculate_scenario_impacts(scenarios_df, materials_df)
     assert all(hasattr(r, "npv_net_benefit_ngn") for r in results)
+    assert all(hasattr(r, "project_irr_pct") for r in results)
 
 
 def test_custom_scenario_discounted_metrics(materials_df: pd.DataFrame):
     result = calculate_custom_scenario(materials_df, {"Sugar": 1200})
     assert isinstance(result.npv_net_benefit_ngn, float)
+    assert hasattr(result, "project_irr_pct")
 
 
 def test_sqlite_adapter_round_trip():
@@ -47,3 +53,49 @@ def test_factory_rejects_api_for_writes(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(cfg, "DATA_BACKEND", "api")
     with pytest.raises(RuntimeError, match="read-only"):
         get_data_adapter(require_writable=True)
+
+
+def test_external_api_adapter_contract_round_trip():
+    payloads = {
+        "/materials": [{"material_category": "Sugar", "option_type": "Traditional"}],
+        "/scenarios": [{"company_name": "Test Co", "materials_mix": {"Sugar": 10}}],
+        "/results": [{"company_name": "Test Co", "net_annual_impact_ngn": 12345}],
+        "/summary": {"total_net_benefit": 12345},
+    }
+
+    class _Handler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802
+            payload = payloads.get(self.path)
+            if payload is None:
+                self.send_response(404)
+                self.end_headers()
+                return
+            body = json.dumps(payload).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, format: str, *args: object) -> None:
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        base_url = f"http://127.0.0.1:{server.server_port}"
+        adapter = ExternalApiAdapter(base_url)
+
+        materials = adapter.load_materials()
+        scenarios = adapter.load_scenarios()
+        results = adapter.load_results()
+        summary = adapter.load_summary()
+
+        assert list(materials.columns) == ["material_category", "option_type"]
+        assert list(scenarios.columns) == ["company_name", "materials_mix"]
+        assert list(results.columns) == ["company_name", "net_annual_impact_ngn"]
+        assert summary["total_net_benefit"] == 12345
+    finally:
+        server.shutdown()
+        server.server_close()

@@ -131,6 +131,9 @@ if st.button("Calculate ROI", type="primary", disabled=len(custom_mix) == 0):
         discounted_payback = f"{result.discounted_payback_years:.1f} yrs"
     c8.metric("Discounted Payback", discounted_payback)
 
+    if result.project_irr_pct is not None:
+        st.metric("Project IRR", f"{result.project_irr_pct:.1f}%")
+
     # ── Savings breakdown — donut chart + table ──────────────────────
     st.markdown("#### Savings Breakdown")
     chart_col, table_col = st.columns([1, 1])

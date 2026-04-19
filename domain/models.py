@@ -52,6 +52,7 @@ class ScenarioResult(BaseModel):
     total_operational_savings_ngn: float
     net_annual_impact_ngn: float
     npv_net_benefit_ngn: float
+    project_irr_pct: float | None = None
     roi_pct: float
     payback_period_years: float
     discounted_payback_years: float | None = None
@@ -70,6 +71,7 @@ class CustomScenarioResult(BaseModel):
     operational_savings: float
     net_impact: float
     npv_net_benefit_ngn: float
+    project_irr_pct: float | None = None
     roi_pct: float
     payback_years: float | None = None
     discounted_payback_years: float | None = None
@@ -81,5 +83,6 @@ class SummaryMetrics(BaseModel):
     total_operational_savings: float
     total_net_benefit: float
     total_npv_net_benefit: float
+    avg_project_irr_pct: float | None = None
     avg_roi_pct: float
     avg_payback_years: float

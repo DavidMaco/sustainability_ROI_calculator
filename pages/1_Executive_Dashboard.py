@@ -38,6 +38,11 @@ row2_c1, row2_c2, _ = st.columns(3)
 row2_c1.metric("Net Benefit", f"{cfg.CURRENCY_SYMBOL}{results_df['net_annual_impact_ngn'].sum():,.0f}")
 row2_c2.metric("Avg Payback", f"{results_df['payback_period_years'].mean():.1f} years")
 
+if "project_irr_pct" in results_df.columns:
+    irr_series = results_df["project_irr_pct"].dropna()
+    if not irr_series.empty:
+        st.metric("Avg Project IRR", f"{irr_series.mean():.1f}%")
+
 if "npv_net_benefit_ngn" in results_df.columns:
     st.metric(
         f"{cfg.ANALYSIS_YEARS}-Year Discounted NPV",

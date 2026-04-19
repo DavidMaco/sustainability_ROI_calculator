@@ -90,6 +90,51 @@ def _npv(base_cashflow: float, years: int, discount_rate: float, growth_rate: fl
     )
 
 
+def _irr_from_cashflows(cashflows: list[float], *, low: float = -0.99, high: float = 10.0) -> float | None:
+    """Estimate IRR via bisection.
+
+    Returns a decimal rate (e.g. 0.23 for 23%) or None when IRR is not defined
+    under the provided cashflow profile.
+    """
+
+    def _npv_rate(rate: float) -> float:
+        return sum(cf / ((1 + rate) ** idx) for idx, cf in enumerate(cashflows))
+
+    f_low = _npv_rate(low)
+    f_high = _npv_rate(high)
+    if f_low == 0:
+        return low
+    if f_high == 0:
+        return high
+    if f_low * f_high > 0:
+        return None
+
+    for _ in range(80):
+        mid = (low + high) / 2
+        f_mid = _npv_rate(mid)
+        if abs(f_mid) < 1e-9:
+            return mid
+        if f_low * f_mid < 0:
+            high = mid
+            f_high = f_mid
+        else:
+            low = mid
+            f_low = f_mid
+    return (low + high) / 2
+
+
+def _project_irr_pct(cost_increase: float, annual_savings: float, years: int, growth_rate: float) -> float | None:
+    if cost_increase <= 0 or annual_savings <= 0:
+        return None
+
+    cashflows = [-cost_increase]
+    cashflows.extend(_projected_cashflow(annual_savings, y, growth_rate) for y in range(1, years + 1))
+    irr = _irr_from_cashflows(cashflows)
+    if irr is None:
+        return None
+    return irr * 100
+
+
 def _discounted_payback_years(
     cost_increase: float, annual_savings: float, years: int, discount_rate: float, growth_rate: float
 ) -> float | None:
@@ -191,6 +236,12 @@ def calculate_scenario_impacts(scenarios_df: pd.DataFrame, materials_df: pd.Data
             discount_rate=cfg.DISCOUNT_RATE,
             growth_rate=cfg.ANNUAL_NET_BENEFIT_GROWTH_RATE,
         )
+        project_irr_pct = _project_irr_pct(
+            cost_change,
+            operational_savings,
+            years=cfg.ANALYSIS_YEARS,
+            growth_rate=cfg.ANNUAL_NET_BENEFIT_GROWTH_RATE,
+        )
 
         results.append(
             ScenarioResult(
@@ -212,6 +263,7 @@ def calculate_scenario_impacts(scenarios_df: pd.DataFrame, materials_df: pd.Data
                 total_operational_savings_ngn=operational_savings,
                 net_annual_impact_ngn=net_annual_impact,
                 npv_net_benefit_ngn=npv_net_benefit,
+                project_irr_pct=project_irr_pct,
                 roi_pct=roi_pct,
                 payback_period_years=min(payback_years, 20),
                 discounted_payback_years=discounted_payback,
@@ -284,6 +336,12 @@ def calculate_custom_scenario(
         discount_rate=cfg.DISCOUNT_RATE,
         growth_rate=cfg.ANNUAL_NET_BENEFIT_GROWTH_RATE,
     )
+    project_irr_pct = _project_irr_pct(
+        cost_increase,
+        operational_savings,
+        years=cfg.ANALYSIS_YEARS,
+        growth_rate=cfg.ANNUAL_NET_BENEFIT_GROWTH_RATE,
+    )
 
     return CustomScenarioResult(
         cost_increase=cost_increase,
@@ -297,6 +355,7 @@ def calculate_custom_scenario(
         operational_savings=operational_savings,
         net_impact=net_impact,
         npv_net_benefit_ngn=npv_net_benefit,
+        project_irr_pct=project_irr_pct,
         roi_pct=roi,
         payback_years=payback,
         discounted_payback_years=discounted_payback,
@@ -306,12 +365,14 @@ def calculate_custom_scenario(
 def compute_summary_metrics(results: list[ScenarioResult]) -> SummaryMetrics:
     """Aggregate metrics across all scenario results."""
     n = len(results)
+    irr_values = [r.project_irr_pct for r in results if r.project_irr_pct is not None]
     return SummaryMetrics(
         total_cost_increase=sum(r.cost_increase_ngn for r in results),
         total_carbon_reduction_tons=sum(r.carbon_reduction_tons for r in results),
         total_operational_savings=sum(r.total_operational_savings_ngn for r in results),
         total_net_benefit=sum(r.net_annual_impact_ngn for r in results),
         total_npv_net_benefit=sum(r.npv_net_benefit_ngn for r in results),
+        avg_project_irr_pct=(sum(irr_values) / len(irr_values)) if irr_values else None,
         avg_roi_pct=sum(r.roi_pct for r in results) / n if n else 0.0,
         avg_payback_years=sum(r.payback_period_years for r in results) / n if n else 0.0,
     )
