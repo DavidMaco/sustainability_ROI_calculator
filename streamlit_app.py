@@ -2,7 +2,13 @@
 Sustainability ROI Calculator — Main Streamlit App
 """
 
+import threading
+
 import streamlit as st
+
+# Module-level lock: prevents concurrent pipeline generation when multiple
+# users arrive simultaneously on a fresh deployment with no data yet.
+_PIPELINE_LOCK = threading.Lock()
 
 st.set_page_config(
     page_title="Sustainability ROI Calculator",
@@ -30,10 +36,16 @@ require_role("viewer")
 data_ready = (cfg.DATA_DIR / "sustainability_roi_analysis.csv").exists()
 
 if not data_ready:
-    st.warning("No data found. Generating baseline data…")
-    from pipeline.runner import run_pipeline
+    # Only one thread/session should run the pipeline at a time.
+    # If another session is already generating data, this one waits and then
+    # skips generation (the file will exist by the time the lock is released).
+    with _PIPELINE_LOCK:
+        # Re-check inside the lock: another session may have just written the data.
+        if not (cfg.DATA_DIR / "sustainability_roi_analysis.csv").exists():
+            st.warning("No data found. Generating baseline data…")
+            from pipeline.runner import run_pipeline
 
-    run_pipeline(adapter)
+            run_pipeline(adapter)
     st.rerun()
 
 # ─── Landing Page ────────────────────────────────────────────────────

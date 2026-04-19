@@ -11,6 +11,14 @@ from ui_theme import CARBON_PAIR, COMPARISON_PAIR, SAVINGS_COLOURS, apply_theme
 
 st.set_page_config(page_title="Executive Dashboard", page_icon="📊", layout="wide")
 apply_theme()
+
+
+def _init_page_state() -> None:
+    """Ensure expected session keys exist before any widget or auth check."""
+    st.session_state.setdefault("auth_ok", False)
+
+
+_init_page_state()
 require_login()
 require_role("viewer")
 

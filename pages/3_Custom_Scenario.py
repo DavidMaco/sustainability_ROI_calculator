@@ -24,6 +24,22 @@ class EconomicAssumptions:
 
 st.set_page_config(page_title="Custom Scenario", page_icon="🧮", layout="wide")
 apply_theme()
+
+
+def _init_page_state() -> None:
+    """Initialise scenario widget defaults in session state.
+
+    Using setdefault means Streamlit's own widget-state reconciliation still
+    owns the values after first render — this only fires on cold-start (direct
+    navigation to this page before the home page has run).
+    """
+    st.session_state.setdefault("auth_ok", False)
+    st.session_state.setdefault("scenario_carbon_tax", cfg.CARBON_TAX_NGN_PER_TON)
+    st.session_state.setdefault("scenario_water_cost", cfg.WATER_COST_NGN_PER_1000L)
+    st.session_state.setdefault("scenario_waste_cost", cfg.WASTE_COST_NGN_PER_TON)
+
+
+_init_page_state()
 require_login()
 require_role("analyst")
 
@@ -37,9 +53,15 @@ categories = sorted(materials_df["material_category"].unique())
 # ─── Economic assumptions sidebar ────────────────────────────────────
 with st.sidebar:
     st.markdown("### ⚙️ Assumptions")
-    carbon_tax = st.number_input("Carbon Tax (₦/ton)", value=cfg.CARBON_TAX_NGN_PER_TON, step=5000.0, key="ct")
-    water_cost = st.number_input("Water Cost (₦/1000L)", value=cfg.WATER_COST_NGN_PER_1000L, step=10.0, key="wc")
-    waste_cost = st.number_input("Waste Cost (₦/ton)", value=cfg.WASTE_COST_NGN_PER_TON, step=5000.0, key="wst")
+    carbon_tax = st.number_input(
+        "Carbon Tax (₦/ton)", value=cfg.CARBON_TAX_NGN_PER_TON, step=5000.0, key="scenario_carbon_tax"
+    )
+    water_cost = st.number_input(
+        "Water Cost (₦/1000L)", value=cfg.WATER_COST_NGN_PER_1000L, step=10.0, key="scenario_water_cost"
+    )
+    waste_cost = st.number_input(
+        "Waste Cost (₦/ton)", value=cfg.WASTE_COST_NGN_PER_TON, step=5000.0, key="scenario_waste_cost"
+    )
 
 assumptions = EconomicAssumptions(carbon_tax=carbon_tax, water_cost=water_cost, waste_cost=waste_cost)
 
@@ -60,7 +82,9 @@ def _render_inputs(label: str, items: list[str]) -> None:
         cols = st.columns(2)
         for i, cat in enumerate(available):
             unit = materials_df[materials_df["material_category"] == cat].iloc[0]["unit_of_measure"]
-            val = cols[i % 2].number_input(f"{cat} ({unit})", min_value=0.0, value=0.0, step=100.0, key=f"mat_{cat}")
+            val = cols[i % 2].number_input(
+                f"{cat} ({unit})", min_value=0.0, value=0.0, step=100.0, key=f"scenario_mat_{cat}"
+            )
             if val > 0:
                 custom_mix[cat] = val
 
