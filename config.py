@@ -36,12 +36,20 @@ logger = logging.getLogger("sustainability_roi")
 PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_DIR = PROJECT_ROOT / os.getenv("SUST_DATA_DIR", "data")
 DATA_DIR.mkdir(exist_ok=True)
+SQLITE_DB_PATH = PROJECT_ROOT / os.getenv("SUST_SQLITE_DB_PATH", "data/sustainability_roi.db")
+
+# ─── Data Backend / External Connectors ─────────────────────────────
+DATA_BACKEND = os.getenv("SUST_DATA_BACKEND", "csv").strip().lower()  # csv | sqlite | api
+EXTERNAL_API_BASE_URL = os.getenv("SUST_EXTERNAL_API_BASE_URL", "http://127.0.0.1:8080")
 
 # ─── Economic Assumptions (overridable via env) ──────────────────────
 CARBON_TAX_NGN_PER_TON = float(os.getenv("SUST_CARBON_TAX", "50000"))  # ₦50,000/ton
 WATER_COST_NGN_PER_1000L = float(os.getenv("SUST_WATER_COST", "150"))  # ₦150/1000L
 WASTE_COST_NGN_PER_TON = float(os.getenv("SUST_WASTE_COST", "80000"))  # ₦80,000/ton
 CURRENCY_SYMBOL = os.getenv("SUST_CURRENCY", "₦")
+ANALYSIS_YEARS = int(os.getenv("SUST_ANALYSIS_YEARS", "5"))
+DISCOUNT_RATE = float(os.getenv("SUST_DISCOUNT_RATE", "0.12"))
+ANNUAL_NET_BENEFIT_GROWTH_RATE = float(os.getenv("SUST_NET_BENEFIT_GROWTH_RATE", "0.03"))
 
 # ─── Reproducibility ────────────────────────────────────────────────
 RANDOM_SEED = int(os.getenv("SUST_RANDOM_SEED", "42"))
@@ -70,6 +78,9 @@ def validate_runtime_settings() -> None:
     assert CARBON_TAX_NGN_PER_TON > 0, "Carbon tax must be positive in production"
     assert WATER_COST_NGN_PER_1000L > 0, "Water cost must be positive in production"
     assert WASTE_COST_NGN_PER_TON > 0, "Waste cost must be positive in production"
+    assert ANALYSIS_YEARS > 0, "Analysis years must be positive in production"
+    assert 0 <= DISCOUNT_RATE < 1, "Discount rate must be between 0 and 1 in production"
+    assert -0.5 <= ANNUAL_NET_BENEFIT_GROWTH_RATE < 1, "Net-benefit growth rate out of allowed range"
     assert SESSION_TIMEOUT_MINUTES > 0, "Session timeout must be positive in production"
     assert ARTIFACT_BACKUP_RETENTION > 0, "Backup retention must be positive in production"
     assert METRICS_PORT > 0, "Metrics port must be positive in production"

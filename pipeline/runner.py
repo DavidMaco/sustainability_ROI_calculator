@@ -16,7 +16,7 @@ from domain.scenarios import (
     generate_company_scenarios_df,
 )
 from ingestion.base import DataAdapter
-from ingestion.csv_adapter import CsvAdapter
+from ingestion.factory import get_data_adapter
 from pipeline.backup import create_artifact_backup
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ def _safe_print(*args: object, **kwargs: object) -> None:
 def run_pipeline(adapter: DataAdapter | None = None) -> None:
     """Generate data, compute impacts, and persist all artifacts."""
     cfg.validate_runtime_settings()
-    adapter = adapter or CsvAdapter()
+    adapter = adapter or get_data_adapter(require_writable=True)
     start = time.perf_counter()
 
     logger.info("Step 1/4 — Generating material sustainability profiles")

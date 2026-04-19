@@ -142,6 +142,9 @@ data/ (generated artifacts)
 - `domain/recommendations.py`: Quick-win and comparison logic.
 - `ingestion/base.py`: Abstract adapter interface.
 - `ingestion/csv_adapter.py`: CSV and JSON persistence implementation.
+- `ingestion/sqlite_adapter.py`: SQLite read/write persistence implementation.
+- `ingestion/external_api_adapter.py`: Read-only HTTP API connector implementation.
+- `ingestion/factory.py`: Runtime adapter selection (`csv`, `sqlite`, `api`).
 - `pipeline/runner.py`: End-to-end CLI workflow.
 - `streamlit_app.py`: Application entry point and data readiness behavior.
 - `pages/`: Streamlit page modules.
@@ -158,6 +161,12 @@ Runtime and economic assumptions are environment-configurable.
 - `SUST_RANDOM_SEED` (default `42`): Random seed for deterministic generation.
 - `SUST_DATA_DIR` (default `data`): Output artifact directory.
 - `SUST_LOG_LEVEL` (default `INFO`): Logging level.
+- `SUST_DATA_BACKEND` (default `csv`): Data adapter backend (`csv`, `sqlite`, `api`).
+- `SUST_SQLITE_DB_PATH` (default `data/sustainability_roi.db`): SQLite artifact path.
+- `SUST_EXTERNAL_API_BASE_URL` (default `http://127.0.0.1:8080`): API adapter base URL.
+- `SUST_ANALYSIS_YEARS` (default `5`): Multi-year discounted cash-flow horizon.
+- `SUST_DISCOUNT_RATE` (default `0.12`): Discount rate for NPV.
+- `SUST_NET_BENEFIT_GROWTH_RATE` (default `0.03`): Annual net-benefit growth assumption.
 
 In production mode (`SUST_ENV=production`), runtime assumption guardrails are enabled.
 
@@ -173,6 +182,9 @@ Operational Savings = Carbon Tax Avoidance + Water Savings + Waste Savings
 
 ROI %   = Net Benefit / |Cost Increase| * 100
 Payback = |Cost Increase| / Operational Savings
+
+NPV = sum_{year=1..ANALYSIS_YEARS}
+        (Net Annual Benefit * (1 + NET_BENEFIT_GROWTH_RATE)^(year-1)) / (1 + DISCOUNT_RATE)^year
 ```
 
 ## 📦 Output Artifacts
@@ -233,14 +245,14 @@ Before enabling auth in production, create `.streamlit/secrets.toml` from `.stre
 ### Kubernetes deployment baseline
 
 ```bash
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/secret.example.yaml
-kubectl apply -f k8s/pvc.yaml
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-kubectl apply -f k8s/hpa.yaml
-kubectl apply -f k8s/ingress.yaml
+kubectl apply -f k8s/base/namespace.yaml
+kubectl apply -f k8s/base/configmap.yaml
+kubectl apply -f k8s/base/secret.example.yaml
+kubectl apply -f k8s/base/pvc.yaml
+kubectl apply -f k8s/base/deployment.yaml
+kubectl apply -f k8s/base/service.yaml
+kubectl apply -f k8s/base/hpa.yaml
+kubectl apply -f k8s/base/ingress.yaml
 ```
 
 Update hostnames, image tags, and secret values before using manifests in non-local environments.
@@ -257,8 +269,8 @@ kubectl apply -k k8s/overlays/staging
 kubectl apply -k k8s/overlays/production
 ```
 
-The deployment includes a Fluent Bit sidecar that tails application logs from `/var/log/app` and forwards them to stdout by default.
-Replace output settings in `k8s/logging/fluent-bit-configmap.yaml` for Elasticsearch or Loki in production.
+The deployment includes a Fluent Bit sidecar that tails application logs from `/var/log/app`.
+Production overlay routes logs to Loki via `k8s/overlays/production/patch-fluent-bit-loki.yaml`.
 
 Security hardening included in base manifests:
 
@@ -266,8 +278,8 @@ Security hardening included in base manifests:
 - Pod and container security contexts (non-root, dropped Linux capabilities)
 - Default-deny network policy with explicit ingress and egress allow lists
 
-CI now enforces runtime gates by starting Streamlit, checking `/_stcore/health`, and running both `scripts/healthcheck.py` and `scripts/load_test.py`.
-It also validates Kubernetes base plus staging and production overlays via `kubectl kustomize` and client-side dry-run apply.
+CI now enforces runtime gates by starting Streamlit, checking `/_stcore/health`, and running both `scripts/healthcheck.py` and `scripts/load_test.py` with latency/failure thresholds.
+It validates Kubernetes base, overlays, and policy manifests using `kubectl kustomize` + `kubeconform` (offline schema validation), and publishes performance trend summaries.
 
 ## 🔄 CI/CD
 
@@ -281,12 +293,12 @@ Workflow definition: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
 ## 🗺 Roadmap
 
-- [ ] External data connectors (API and database adapters)
-- [ ] Multi-year discounted cash flow analysis (NPV and IRR)
+- [x] External data connectors (API and SQLite adapters)
+- [x] Multi-year discounted cash flow analysis (NPV and discounted payback)
 - [ ] Constraint-aware scenario optimization
-- [ ] Authentication and RBAC for hosted deployments
-- [ ] Operational observability and health reporting
-- [ ] Containerization and Kubernetes deployment manifests
+- [x] Authentication and RBAC for hosted deployments
+- [x] Operational observability and health reporting
+- [x] Containerization and Kubernetes deployment manifests
 - [ ] Monte Carlo sensitivity analysis on key assumptions
 
 ## 📖 Documentation

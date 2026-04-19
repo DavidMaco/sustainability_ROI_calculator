@@ -34,7 +34,7 @@ docs/        Project documentation
 ruff check . --config pyproject.toml
 black --check --config pyproject.toml .
 pytest tests -q
-python -m pyright config.py security.py secrets_adapter.py scripts/healthcheck.py scripts/load_test.py scripts/metrics_server.py
+python -m pyright config.py domain/models.py domain/scenarios.py ingestion/factory.py ingestion/external_api_adapter.py ingestion/sqlite_adapter.py security.py secrets_adapter.py scripts/healthcheck.py scripts/load_test.py scripts/perf_report.py scripts/metrics_server.py
 ```
 
 ### Pipeline Smoke Test

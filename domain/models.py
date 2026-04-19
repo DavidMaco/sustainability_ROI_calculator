@@ -51,8 +51,10 @@ class ScenarioResult(BaseModel):
     waste_disposal_savings_ngn: float
     total_operational_savings_ngn: float
     net_annual_impact_ngn: float
+    npv_net_benefit_ngn: float
     roi_pct: float
     payback_period_years: float
+    discounted_payback_years: float | None = None
     achieves_target: bool
 
 
@@ -67,8 +69,10 @@ class CustomScenarioResult(BaseModel):
     waste_disposal_savings_ngn: float
     operational_savings: float
     net_impact: float
+    npv_net_benefit_ngn: float
     roi_pct: float
     payback_years: float | None = None
+    discounted_payback_years: float | None = None
 
 
 class SummaryMetrics(BaseModel):
@@ -76,5 +80,6 @@ class SummaryMetrics(BaseModel):
     total_carbon_reduction_tons: float
     total_operational_savings: float
     total_net_benefit: float
+    total_npv_net_benefit: float
     avg_roi_pct: float
     avg_payback_years: float

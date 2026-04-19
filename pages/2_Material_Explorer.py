@@ -4,7 +4,7 @@ import plotly.express as px
 import streamlit as st
 
 from domain.recommendations import build_material_comparison_table, identify_quick_wins
-from ingestion.csv_adapter import CsvAdapter
+from ingestion.factory import get_data_adapter
 from security import require_login, require_role
 from ui_theme import BRAND_GREEN, apply_theme
 
@@ -24,7 +24,7 @@ require_role("viewer")
 st.title("🔍 Material Explorer")
 st.caption("Side-by-side comparison of traditional vs sustainable material options across all categories.")
 
-adapter = CsvAdapter()
+adapter = get_data_adapter()
 materials_df = adapter.load_materials()
 comparison = build_material_comparison_table(materials_df)
 

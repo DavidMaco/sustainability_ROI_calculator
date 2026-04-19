@@ -75,10 +75,16 @@ jobs:
         run: |
           python -m pyright \
             config.py \
+            domain/models.py \
+            domain/scenarios.py \
+            ingestion/factory.py \
+            ingestion/external_api_adapter.py \
+            ingestion/sqlite_adapter.py \
             security.py \
             secrets_adapter.py \
             scripts/healthcheck.py \
             scripts/load_test.py \
+            scripts/perf_report.py \
             scripts/metrics_server.py
 
       - name: Start Streamlit for runtime checks

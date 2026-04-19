@@ -8,7 +8,7 @@ import streamlit as st
 
 import config as cfg
 from domain.scenarios import calculate_custom_scenario
-from ingestion.csv_adapter import CsvAdapter
+from ingestion.factory import get_data_adapter
 from security import require_login, require_role
 from ui_theme import SAVINGS_COLOURS, apply_theme
 
@@ -46,7 +46,7 @@ require_role("analyst")
 st.title("🧮 Custom Scenario Builder")
 st.caption("Enter your annual procurement volumes and adjust economic assumptions to see instant ROI.")
 
-adapter = CsvAdapter()
+adapter = get_data_adapter()
 materials_df = adapter.load_materials()
 categories = sorted(materials_df["material_category"].unique())
 
@@ -120,6 +120,16 @@ if st.button("Calculate ROI", type="primary", disabled=len(custom_mix) == 0):
     c5.metric("ROI", f"{result.roi_pct:,.1f}%")
     payback_str = f"{result.payback_years:.1f} yrs" if result.payback_years else "Immediate"
     c6.metric("Payback Period", payback_str)
+
+    c7, c8 = st.columns(2)
+    c7.metric(
+        f"{cfg.ANALYSIS_YEARS}-Year Discounted NPV",
+        f"{cfg.CURRENCY_SYMBOL}{result.npv_net_benefit_ngn:,.0f}",
+    )
+    discounted_payback = "Not reached"
+    if result.discounted_payback_years is not None:
+        discounted_payback = f"{result.discounted_payback_years:.1f} yrs"
+    c8.metric("Discounted Payback", discounted_payback)
 
     # ── Savings breakdown — donut chart + table ──────────────────────
     st.markdown("#### Savings Breakdown")

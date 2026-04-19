@@ -1,6 +1,6 @@
 # Production Readiness - Sustainability ROI Calculator v2.0.2
 
-## Status: Pilot-Ready
+## Status: Production-Complete
 
 ### Ready
 
@@ -30,14 +30,14 @@
 - [x] Kubernetes Kustomize overlays for staging and production
 - [x] Centralized log shipping baseline via Fluent Bit sidecar config
 - [x] Kubernetes policy hardening baseline (service account, security context, network policies)
-- [x] CI manifest validation for base and overlays (`kubectl kustomize` + dry-run apply)
+- [x] CI manifest validation for base, overlays, and policy manifests (`kubectl kustomize` + `kubeconform`)
 
-### Remaining for Full Production
+### Full Production Completion
 
 - [x] Secrets management (Vault / AWS SM / GCP SM adapter with env fallback)
 - [x] Production log sink integration and dashboards (Loki via Fluent Bit in production overlay)
-- [ ] Load testing for Streamlit under concurrent users
-- [ ] External data connector (API / DB adapter)
-- [ ] NPV / multi-year discounted analysis
-- [ ] Expanded performance thresholds and trend dashboards in CI/CD
-- [ ] Policy admission enforcement (OPA Gatekeeper/Kyverno) and signed image policies
+- [x] Load testing for Streamlit under concurrent users (configurable thresholds + metrics artifacts)
+- [x] External data connector (API + SQLite adapters via runtime factory)
+- [x] NPV / multi-year discounted analysis (discounted cash-flow and payback fields)
+- [x] Expanded performance thresholds and trend dashboards in CI/CD (step summary + trend artifact)
+- [x] Policy admission enforcement (Kyverno baseline + signed image verification policies)

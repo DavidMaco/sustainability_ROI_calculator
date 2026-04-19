@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 import config as cfg
-from ingestion.csv_adapter import CsvAdapter
+from ingestion.factory import get_data_adapter
 from security import require_login, require_role
 from ui_theme import CARBON_PAIR, COMPARISON_PAIR, SAVINGS_COLOURS, apply_theme
 
@@ -25,7 +25,7 @@ require_role("viewer")
 st.title("📊 Executive Dashboard")
 st.caption("Aggregate financial and environmental impact across all company scenarios.")
 
-adapter = CsvAdapter()
+adapter = get_data_adapter()
 results_df = adapter.load_results()
 
 # ─── Aggregate KPIs (2-row layout to avoid cramping) ─────────────────
@@ -37,6 +37,13 @@ row1_c3.metric("Operational Savings", f"{cfg.CURRENCY_SYMBOL}{results_df['total_
 row2_c1, row2_c2, _ = st.columns(3)
 row2_c1.metric("Net Benefit", f"{cfg.CURRENCY_SYMBOL}{results_df['net_annual_impact_ngn'].sum():,.0f}")
 row2_c2.metric("Avg Payback", f"{results_df['payback_period_years'].mean():.1f} years")
+
+if "npv_net_benefit_ngn" in results_df.columns:
+    st.metric(
+        f"{cfg.ANALYSIS_YEARS}-Year Discounted NPV",
+        f"{cfg.CURRENCY_SYMBOL}{results_df['npv_net_benefit_ngn'].sum():,.0f}",
+        help=(f"Discount rate: {cfg.DISCOUNT_RATE:.0%} · " f"Growth rate: {cfg.ANNUAL_NET_BENEFIT_GROWTH_RATE:.0%}"),
+    )
 
 st.markdown("---")
 

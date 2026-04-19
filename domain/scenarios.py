@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from ast import literal_eval
+from typing import Any
 
 import pandas as pd
 
@@ -75,6 +76,36 @@ COMPANY_SCENARIOS: list[dict] = [
 ]
 
 
+def _projected_cashflow(base_cashflow: float, year: int, growth_rate: float) -> float:
+    return base_cashflow * ((1 + growth_rate) ** (year - 1))
+
+
+def _discount(value: float, year: int, discount_rate: float) -> float:
+    return value / ((1 + discount_rate) ** year)
+
+
+def _npv(base_cashflow: float, years: int, discount_rate: float, growth_rate: float) -> float:
+    return sum(
+        _discount(_projected_cashflow(base_cashflow, y, growth_rate), y, discount_rate) for y in range(1, years + 1)
+    )
+
+
+def _discounted_payback_years(
+    cost_increase: float, annual_savings: float, years: int, discount_rate: float, growth_rate: float
+) -> float | None:
+    if cost_increase <= 0:
+        return 0.0
+    if annual_savings <= 0:
+        return None
+
+    cumulative = 0.0
+    for y in range(1, years + 1):
+        cumulative += _discount(_projected_cashflow(annual_savings, y, growth_rate), y, discount_rate)
+        if cumulative >= cost_increase:
+            return float(y)
+    return None
+
+
 def generate_company_scenarios_df() -> pd.DataFrame:
     """Return the predefined company scenarios as a DataFrame."""
     return pd.DataFrame(COMPANY_SCENARIOS)
@@ -90,7 +121,11 @@ def calculate_scenario_impacts(scenarios_df: pd.DataFrame, materials_df: pd.Data
     results: list[ScenarioResult] = []
 
     for _, company in scenarios_df.iterrows():
-        mix = company["materials_mix"]
+        company_name = str(company["company_name"])
+        industry = str(company["industry"])
+        target_carbon_reduction_pct = float(company["target_carbon_reduction_pct"])
+
+        mix: Any = company["materials_mix"]
         if isinstance(mix, str):
             try:
                 mix = json.loads(mix)
@@ -99,6 +134,8 @@ def calculate_scenario_impacts(scenarios_df: pd.DataFrame, materials_df: pd.Data
                 if not isinstance(parsed, dict):
                     raise TypeError(f"Expected dict for materials_mix, got {type(parsed).__name__}")
                 mix = parsed
+        if not isinstance(mix, dict):
+            raise TypeError(f"Expected dict for materials_mix, got {type(mix).__name__}")
 
         trad_cost = trad_carbon = trad_water = trad_waste = 0.0
         sust_cost = sust_carbon = sust_water = sust_waste = 0.0
@@ -106,7 +143,7 @@ def calculate_scenario_impacts(scenarios_df: pd.DataFrame, materials_df: pd.Data
         for material, quantity in mix.items():
             if material not in available_categories:
                 raise ValueError(
-                    f"Material '{material}' in scenario '{company['company_name']}' "
+                    f"Material '{material}' in scenario '{company_name}' "
                     f"not found in materials data. Available: {sorted(available_categories)}"
                 )
             quantity = float(quantity)
@@ -139,13 +176,26 @@ def calculate_scenario_impacts(scenarios_df: pd.DataFrame, materials_df: pd.Data
 
         operational_savings = carbon_tax_savings + water_cost_savings + waste_savings
         net_annual_impact = operational_savings - cost_change
+        npv_net_benefit = _npv(
+            net_annual_impact,
+            years=cfg.ANALYSIS_YEARS,
+            discount_rate=cfg.DISCOUNT_RATE,
+            growth_rate=cfg.ANNUAL_NET_BENEFIT_GROWTH_RATE,
+        )
         roi_pct = (net_annual_impact / abs(cost_change) * 100) if cost_change != 0 else 0.0
         payback_years = abs(cost_change) / operational_savings if operational_savings > 0 else 999.0
+        discounted_payback = _discounted_payback_years(
+            cost_change,
+            operational_savings,
+            years=cfg.ANALYSIS_YEARS,
+            discount_rate=cfg.DISCOUNT_RATE,
+            growth_rate=cfg.ANNUAL_NET_BENEFIT_GROWTH_RATE,
+        )
 
         results.append(
             ScenarioResult(
-                company_name=company["company_name"],
-                industry=company["industry"],
+                company_name=company_name,
+                industry=industry,
                 traditional_annual_cost_ngn=trad_cost,
                 sustainable_annual_cost_ngn=sust_cost,
                 cost_increase_ngn=cost_change,
@@ -161,12 +211,12 @@ def calculate_scenario_impacts(scenarios_df: pd.DataFrame, materials_df: pd.Data
                 waste_disposal_savings_ngn=waste_savings,
                 total_operational_savings_ngn=operational_savings,
                 net_annual_impact_ngn=net_annual_impact,
+                npv_net_benefit_ngn=npv_net_benefit,
                 roi_pct=roi_pct,
                 payback_period_years=min(payback_years, 20),
+                discounted_payback_years=discounted_payback,
                 achieves_target=(
-                    (carbon_saved / trad_carbon * 100) >= company["target_carbon_reduction_pct"]
-                    if trad_carbon > 0
-                    else False
+                    (carbon_saved / trad_carbon * 100) >= target_carbon_reduction_pct if trad_carbon > 0 else False
                 ),
             )
         )
@@ -219,8 +269,21 @@ def calculate_custom_scenario(
     operational_savings = carbon_tax_savings + water_cost_savings + waste_savings
     cost_increase = sust_cost - trad_cost
     net_impact = operational_savings - cost_increase
+    npv_net_benefit = _npv(
+        net_impact,
+        years=cfg.ANALYSIS_YEARS,
+        discount_rate=cfg.DISCOUNT_RATE,
+        growth_rate=cfg.ANNUAL_NET_BENEFIT_GROWTH_RATE,
+    )
     roi = (net_impact / abs(cost_increase) * 100) if cost_increase != 0 else 0.0
     payback = (cost_increase / operational_savings) if (cost_increase > 0 and operational_savings > 0) else None
+    discounted_payback = _discounted_payback_years(
+        cost_increase,
+        operational_savings,
+        years=cfg.ANALYSIS_YEARS,
+        discount_rate=cfg.DISCOUNT_RATE,
+        growth_rate=cfg.ANNUAL_NET_BENEFIT_GROWTH_RATE,
+    )
 
     return CustomScenarioResult(
         cost_increase=cost_increase,
@@ -233,8 +296,10 @@ def calculate_custom_scenario(
         waste_disposal_savings_ngn=waste_savings,
         operational_savings=operational_savings,
         net_impact=net_impact,
+        npv_net_benefit_ngn=npv_net_benefit,
         roi_pct=roi,
         payback_years=payback,
+        discounted_payback_years=discounted_payback,
     )
 
 
@@ -246,6 +311,7 @@ def compute_summary_metrics(results: list[ScenarioResult]) -> SummaryMetrics:
         total_carbon_reduction_tons=sum(r.carbon_reduction_tons for r in results),
         total_operational_savings=sum(r.total_operational_savings_ngn for r in results),
         total_net_benefit=sum(r.net_annual_impact_ngn for r in results),
+        total_npv_net_benefit=sum(r.npv_net_benefit_ngn for r in results),
         avg_roi_pct=sum(r.roi_pct for r in results) / n if n else 0.0,
         avg_payback_years=sum(r.payback_period_years for r in results) / n if n else 0.0,
     )

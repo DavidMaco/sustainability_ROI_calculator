@@ -1,0 +1,24 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: sroi-require-signed-images
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: verify-ghcr-image-signatures
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - ghcr.io/davidmaco/sustainability-roi-calculator*
+          mutateDigest: true
+          required: true
+          attestors:
+            - entries:
+                - keyless:
+                    issuer: https://token.actions.githubusercontent.com
+                    subjectRegExp: https://github.com/DavidMaco/sustainability_ROI_calculator/.github/workflows/.*
