@@ -52,10 +52,12 @@ jobs:
           kubectl kustomize k8s/base > /tmp/k8s-base.yaml
           kubectl kustomize k8s/overlays/staging > /tmp/k8s-staging.yaml
           kubectl kustomize k8s/overlays/production > /tmp/k8s-production.yaml
+          kubectl kustomize k8s/policies > /tmp/k8s-policies.yaml
 
           kubeconform -summary -strict -ignore-missing-schemas /tmp/k8s-base.yaml
           kubeconform -summary -strict -ignore-missing-schemas /tmp/k8s-staging.yaml
           kubeconform -summary -strict -ignore-missing-schemas /tmp/k8s-production.yaml
+          kubeconform -summary -strict -ignore-missing-schemas /tmp/k8s-policies.yaml
 
       - name: Run pipeline smoke test
         run: python -m pipeline.runner
@@ -67,6 +69,9 @@ jobs:
           test -f data/sustainability_roi_analysis.csv
           test -f data/sustainability_summary.json
           test -f data/sustainability_calculator_template.csv
+          test -f data/sustainable_switch_optimization.csv
+          test -f data/monte_carlo_samples.csv
+          test -f data/monte_carlo_bounds.json
 
       - name: Run tests
         run: pytest tests -q
@@ -77,6 +82,8 @@ jobs:
             config.py \
             domain/models.py \
             domain/scenarios.py \
+            domain/optimization.py \
+            domain/monte_carlo.py \
             ingestion/factory.py \
             ingestion/external_api_adapter.py \
             ingestion/sqlite_adapter.py \
@@ -108,7 +115,16 @@ jobs:
         run: python scripts/healthcheck.py
 
       - name: Enforce lightweight load gate
+        env:
+          SUST_LOAD_REQUESTS: "300"
+          SUST_LOAD_CONCURRENCY: "30"
+          SUST_LOAD_MAX_FAILURE_RATE_PCT: "0"
+          SUST_LOAD_MAX_P95_MS: "1000"
+          SUST_LOAD_MAX_P99_MS: "1800"
         run: python scripts/load_test.py
+
+      - name: Publish performance trend summary
+        run: python scripts/perf_report.py
 
       - name: Upload pipeline artifacts
         if: always()
@@ -119,5 +135,11 @@ jobs:
             data/sustainability_roi_analysis.csv
             data/sustainability_summary.json
             data/sustainability_calculator_template.csv
+            data/sustainable_switch_optimization.csv
+            data/monte_carlo_samples.csv
+            data/monte_carlo_bounds.json
+            data/load_test_metrics.json
+            data/load_test_history.jsonl
+            data/load_test_trend.md
             streamlit.log
           if-no-files-found: warn

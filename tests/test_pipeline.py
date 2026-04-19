@@ -34,6 +34,9 @@ def test_pipeline_produces_all_artifacts(tmp_data_dir: Path):
         "sustainability_roi_analysis.csv",
         "sustainability_summary.json",
         "sustainability_calculator_template.csv",
+        "sustainable_switch_optimization.csv",
+        "monte_carlo_samples.csv",
+        "monte_carlo_bounds.json",
     ]
     for fname in expected_files:
         assert (tmp_data_dir / fname).exists(), f"Missing: {fname}"

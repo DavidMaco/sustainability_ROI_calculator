@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import logging
 import time
+from pathlib import Path
 
 import pandas as pd
 
 import config as cfg
 from domain.materials import generate_material_profiles
+from domain.monte_carlo import persist_monte_carlo_outputs, run_monte_carlo
+from domain.optimization import optimize_switches
 from domain.recommendations import build_material_comparison_table
 from domain.scenarios import (
     calculate_scenario_impacts,
@@ -37,7 +40,7 @@ def run_pipeline(adapter: DataAdapter | None = None) -> None:
     adapter = adapter or get_data_adapter(require_writable=True)
     start = time.perf_counter()
 
-    logger.info("Step 1/4 — Generating material sustainability profiles")
+    logger.info("Step 1/5 — Generating material sustainability profiles")
     materials_df = generate_material_profiles()
     logger.info(
         "  Created %d material options across %d categories",
@@ -45,22 +48,45 @@ def run_pipeline(adapter: DataAdapter | None = None) -> None:
         materials_df["material_category"].nunique(),
     )
 
-    logger.info("Step 2/4 — Creating company scenarios")
+    logger.info("Step 2/5 — Creating company scenarios")
     scenarios_df = generate_company_scenarios_df()
     logger.info("  Created %d company scenarios", len(scenarios_df))
 
-    logger.info("Step 3/4 — Calculating ROI and environmental impact")
+    logger.info("Step 3/5 — Calculating ROI and environmental impact")
     results = calculate_scenario_impacts(scenarios_df, materials_df)
     results_df = pd.DataFrame([r.model_dump() for r in results])
     summary = compute_summary_metrics(results)
     logger.info("  Calculated impact analysis for %d scenarios", len(results))
 
-    logger.info("Step 4/4 — Persisting artifacts")
+    logger.info("Step 4/5 — Running optimization and Monte Carlo sensitivity")
+    optimization_df = optimize_switches(
+        materials_df,
+        scenarios_df,
+        budget_increase_limit_ngn=cfg.OPTIMIZATION_BUDGET_INCREASE_NGN,
+        min_carbon_reduction_pct=cfg.OPTIMIZATION_MIN_CARBON_REDUCTION_PCT,
+    )
+    mc_samples_df, mc_bounds = run_monte_carlo(
+        results_df,
+        simulations=cfg.MONTE_CARLO_SIMULATIONS,
+        seed=cfg.RANDOM_SEED,
+        rate_std_dev=cfg.MONTE_CARLO_RATE_STD_DEV,
+        discount_std_dev=cfg.MONTE_CARLO_DISCOUNT_STD_DEV,
+    )
+
+    logger.info("Step 5/5 — Persisting artifacts")
     adapter.save_materials(materials_df)
     adapter.save_scenarios(scenarios_df)
     adapter.save_results(results_df)
     adapter.save_summary(summary.model_dump())
     adapter.save_calculator_template(build_material_comparison_table(materials_df))
+
+    output_dir = Path(getattr(adapter, "data_dir", cfg.DATA_DIR))
+    optimization_path = output_dir / "sustainable_switch_optimization.csv"
+    optimization_df.to_csv(optimization_path, index=False)
+    mc_samples_path, mc_bounds_path = persist_monte_carlo_outputs(mc_samples_df, mc_bounds, output_dir)
+    logger.info("  Saved optimization recommendations: %s", optimization_path.name)
+    logger.info("  Saved Monte Carlo samples: %s", mc_samples_path.name)
+    logger.info("  Saved Monte Carlo bounds: %s", mc_bounds_path.name)
 
     if cfg.ENABLE_ARTIFACT_BACKUP:
         backup = create_artifact_backup(adapter.data_dir, retention=cfg.ARTIFACT_BACKUP_RETENTION)

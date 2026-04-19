@@ -167,6 +167,11 @@ Runtime and economic assumptions are environment-configurable.
 - `SUST_ANALYSIS_YEARS` (default `5`): Multi-year discounted cash-flow horizon.
 - `SUST_DISCOUNT_RATE` (default `0.12`): Discount rate for NPV.
 - `SUST_NET_BENEFIT_GROWTH_RATE` (default `0.03`): Annual net-benefit growth assumption.
+- `SUST_OPTIMIZATION_BUDGET_INCREASE_NGN` (default `250000000`): Max allowed annual procurement cost increase for switch optimization.
+- `SUST_OPTIMIZATION_MIN_CARBON_REDUCTION_PCT` (default `20`): Minimum required portfolio carbon reduction target.
+- `SUST_MONTE_CARLO_SIMULATIONS` (default `1000`): Number of sensitivity simulations.
+- `SUST_MONTE_CARLO_RATE_STD_DEV` (default `0.15`): Std-dev for carbon/water/waste savings multipliers.
+- `SUST_MONTE_CARLO_DISCOUNT_STD_DEV` (default `0.02`): Std-dev for simulated discount rates.
 
 In production mode (`SUST_ENV=production`), runtime assumption guardrails are enabled.
 
@@ -196,6 +201,9 @@ The pipeline generates the following files in `data/`:
 - `sustainability_roi_analysis.csv`: Company-level ROI and impact outputs.
 - `sustainability_summary.json`: Aggregated headline metrics.
 - `sustainability_calculator_template.csv`: Analyst-facing template for comparisons.
+- `sustainable_switch_optimization.csv`: Constraint-aware switch recommendations under budget and carbon targets.
+- `monte_carlo_samples.csv`: Sensitivity simulation samples for net benefit and NPV.
+- `monte_carlo_bounds.json`: P05/P50/P95 uncertainty bounds for annual net benefit and NPV.
 
 ## 🧪 Testing
 
@@ -295,11 +303,11 @@ Workflow definition: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
 - [x] External data connectors (API and SQLite adapters)
 - [x] Multi-year discounted cash flow analysis (NPV and discounted payback)
-- [ ] Constraint-aware scenario optimization
+- [x] Constraint-aware scenario optimization
 - [x] Authentication and RBAC for hosted deployments
 - [x] Operational observability and health reporting
 - [x] Containerization and Kubernetes deployment manifests
-- [ ] Monte Carlo sensitivity analysis on key assumptions
+- [x] Monte Carlo sensitivity analysis on key assumptions
 
 ## 📖 Documentation
 

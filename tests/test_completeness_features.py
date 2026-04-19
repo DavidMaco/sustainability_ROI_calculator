@@ -13,6 +13,8 @@ import pytest
 
 import config as cfg
 from domain.materials import generate_material_profiles
+from domain.monte_carlo import run_monte_carlo
+from domain.optimization import optimize_switches
 from domain.scenarios import calculate_custom_scenario, calculate_scenario_impacts, generate_company_scenarios_df
 from ingestion.external_api_adapter import ExternalApiAdapter
 from ingestion.factory import get_data_adapter
@@ -53,6 +55,36 @@ def test_factory_rejects_api_for_writes(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(cfg, "DATA_BACKEND", "api")
     with pytest.raises(RuntimeError, match="read-only"):
         get_data_adapter(require_writable=True)
+
+
+def test_optimization_respects_budget(materials_df: pd.DataFrame):
+    scenarios_df = generate_company_scenarios_df()
+    recs = optimize_switches(
+        materials_df,
+        scenarios_df,
+        budget_increase_limit_ngn=0,
+        min_carbon_reduction_pct=0,
+    )
+    selected = recs[recs["selected"]]
+    assert float(selected["cost_delta_ngn"].sum()) <= 0
+
+
+def test_monte_carlo_generates_bounds(materials_df: pd.DataFrame):
+    scenarios_df = generate_company_scenarios_df()
+    results = calculate_scenario_impacts(scenarios_df, materials_df)
+    results_df = pd.DataFrame([r.model_dump() for r in results])
+
+    samples_df, bounds = run_monte_carlo(
+        results_df,
+        simulations=200,
+        seed=42,
+        rate_std_dev=0.1,
+        discount_std_dev=0.01,
+    )
+
+    assert len(samples_df) == 200
+    assert "p50_npv_net_benefit_ngn" in bounds
+    assert bounds["p95_npv_net_benefit_ngn"] >= bounds["p05_npv_net_benefit_ngn"]
 
 
 def test_external_api_adapter_contract_round_trip():

@@ -51,6 +51,15 @@ ANALYSIS_YEARS = int(os.getenv("SUST_ANALYSIS_YEARS", "5"))
 DISCOUNT_RATE = float(os.getenv("SUST_DISCOUNT_RATE", "0.12"))
 ANNUAL_NET_BENEFIT_GROWTH_RATE = float(os.getenv("SUST_NET_BENEFIT_GROWTH_RATE", "0.03"))
 
+# ─── Optimization Constraints ───────────────────────────────────────
+OPTIMIZATION_BUDGET_INCREASE_NGN = float(os.getenv("SUST_OPTIMIZATION_BUDGET_INCREASE_NGN", "250000000"))
+OPTIMIZATION_MIN_CARBON_REDUCTION_PCT = float(os.getenv("SUST_OPTIMIZATION_MIN_CARBON_REDUCTION_PCT", "20"))
+
+# ─── Monte Carlo Sensitivity ────────────────────────────────────────
+MONTE_CARLO_SIMULATIONS = int(os.getenv("SUST_MONTE_CARLO_SIMULATIONS", "1000"))
+MONTE_CARLO_RATE_STD_DEV = float(os.getenv("SUST_MONTE_CARLO_RATE_STD_DEV", "0.15"))
+MONTE_CARLO_DISCOUNT_STD_DEV = float(os.getenv("SUST_MONTE_CARLO_DISCOUNT_STD_DEV", "0.02"))
+
 # ─── Reproducibility ────────────────────────────────────────────────
 RANDOM_SEED = int(os.getenv("SUST_RANDOM_SEED", "42"))
 
@@ -81,6 +90,11 @@ def validate_runtime_settings() -> None:
     assert ANALYSIS_YEARS > 0, "Analysis years must be positive in production"
     assert 0 <= DISCOUNT_RATE < 1, "Discount rate must be between 0 and 1 in production"
     assert -0.5 <= ANNUAL_NET_BENEFIT_GROWTH_RATE < 1, "Net-benefit growth rate out of allowed range"
+    assert OPTIMIZATION_BUDGET_INCREASE_NGN >= 0, "Optimization budget must be non-negative"
+    assert 0 <= OPTIMIZATION_MIN_CARBON_REDUCTION_PCT <= 100, "Optimization carbon reduction target must be 0..100"
+    assert MONTE_CARLO_SIMULATIONS >= 100, "Monte Carlo simulations must be at least 100 in production"
+    assert 0 <= MONTE_CARLO_RATE_STD_DEV <= 1, "Monte Carlo rate std-dev must be between 0 and 1"
+    assert 0 <= MONTE_CARLO_DISCOUNT_STD_DEV <= 0.5, "Monte Carlo discount std-dev out of allowed range"
     assert SESSION_TIMEOUT_MINUTES > 0, "Session timeout must be positive in production"
     assert ARTIFACT_BACKUP_RETENTION > 0, "Backup retention must be positive in production"
     assert METRICS_PORT > 0, "Metrics port must be positive in production"

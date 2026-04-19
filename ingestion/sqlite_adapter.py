@@ -17,6 +17,7 @@ class SQLiteAdapter(DataAdapter):
 
     def __init__(self, db_path: Path):
         self.db_path = db_path
+        self.data_dir = db_path.parent
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _conn(self) -> sqlite3.Connection:
